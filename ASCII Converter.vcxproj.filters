@@ -30,7 +30,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="C:\Users\leevi\Desktop\C++\ASCII.png">
+    <Image Include="ASCII.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

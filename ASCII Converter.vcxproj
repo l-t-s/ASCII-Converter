@@ -144,7 +144,7 @@
     <ResourceCompile Include="ASCII Converter.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="C:\Users\leevi\Desktop\C++\ASCII.png" />
+    <Image Include="ASCII.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
