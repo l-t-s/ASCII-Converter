@@ -19,6 +19,9 @@ HANDLE currentHandle = help;
 
 DWORD written;
 CONSOLE_SCREEN_BUFFER_INFO screen;
+CONSOLE_CURSOR_INFO cursor;
+
+int conversion = 13;
 
 void SetWindow(int width, int height)
 {
@@ -60,8 +63,6 @@ void gotoxy(int x, int y)
 
 void draw(char t)
 {
-	clear();
-
 	std::string space = "";
 	std::stringstream tab;
 
@@ -69,6 +70,12 @@ void draw(char t)
 	{
 		space.append(" ");
 	}
+
+	gotoxy(0, 0);
+
+	for (int i = 0; i < screen.srWindow.Right; i++) std::cout << " ";
+
+	gotoxy(0, 0);
 
 	switch (t)
 	{
@@ -91,13 +98,43 @@ void draw(char t)
 void helptab()
 {
 	draw('h');
-	std::cout << "\nMove selection with arrow keys.\nLeft and right to switch tabs.\nEnter / Return key to interact with tab.\nEscape key to exit programme.\n\nUp and down to change options in this tab.\n\n\nConversion : \n\nDecimals\nHexadecimals\nOctals";
-
+	std::cout << "\nMove selection with arrow keys.\nLeft and right to switch tabs.\nEnter / Return key to interact with tab.\nEscape key to exit programme.\n\nUp and down to change options in this tab.\n\n\nConversion:\n\n Decimals\n Hexadecimals\n Octals";
+	if (GetAsyncKeyState(VK_RETURN))
+	{
+		gotoxy(0, conversion);
+		cursor.bVisible = true;
+		SetConsoleCursorInfo(currentHandle, &cursor);
+		while (GetAsyncKeyState(VK_RETURN))
+		{
+			sleep_for(100ms);
+		}
+		while (!GetAsyncKeyState(VK_RETURN))
+		{
+			if (VK_DOWN && conversion != 15)
+			{
+				conversion++;
+			}
+			else if (VK_UP && conversion != 13)
+			{
+				conversion--;
+			}
+			gotoxy(0, conversion);
+			sleep_for(100ms);
+		}
+	}
+	else if (GetAsyncKeyState(VK_RIGHT))
+	{
+		currentHandle = decoding;
+		SetConsoleActiveScreenBuffer(currentHandle);
+	}
 }
 
 int main()
 {
 	SetConsoleTitle(L"ASCII - Help");
+	cursor.dwSize = 100;
+	cursor.bVisible = false;
+	SetConsoleCursorInfo(currentHandle, &cursor);
 	SetWindow(43, 16);
 	SetWindow(44, 17);
 	while (!GetAsyncKeyState(VK_ESCAPE))
@@ -152,17 +189,10 @@ int main()
 		else
 		{
 			helptab();
-			if (GetAsyncKeyState(VK_RETURN))
-			{
-
-			}
-			else if (GetAsyncKeyState(VK_RIGHT))
-			{
-
-			}
 		}
 
-		sleep_for(50ms);
+		sleep_for(100ms);
+		clear();
 	}
     return 0;
 }
