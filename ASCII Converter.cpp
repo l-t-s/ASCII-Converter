@@ -6,7 +6,8 @@
 #include <sstream>
 #include <Windows.h>
 #include <thread> 
-#include <chrono> 
+#include <chrono>
+#include <conio.h>
 
 using namespace std::this_thread;
 using namespace std::chrono_literals;
@@ -21,7 +22,7 @@ DWORD written;
 CONSOLE_SCREEN_BUFFER_INFO screen;
 CONSOLE_CURSOR_INFO cursor;
 
-int conversion = 13;
+int conversion = 12;
 
 void SetWindow(int width, int height)
 {
@@ -61,7 +62,7 @@ void gotoxy(int x, int y)
 	SetConsoleCursorPosition(currentHandle, coord);
 }
 
-void draw(char t)
+void draw()
 {
 	std::string space = "";
 	std::stringstream tab;
@@ -77,66 +78,28 @@ void draw(char t)
 
 	gotoxy(0, 0);
 
-	switch (t)
+	if (currentHandle == help)
 	{
-	case 'h':
 		tab << space << ">Help<" << space << " Decode " << space << " Info " << space << " Encode\n";
-		break;
-	case 'd':
+	}
+	else if (currentHandle == decoding)
+	{
 		tab << space << "Help" << space << ">Decode<" << space << " Info " << space << " Encode\n";
-		break;
-	case 'i':
+	}
+	else if (currentHandle == info)
+	{
 		tab << space << "Help" << space << " Decode " << space << ">Info<" << space << " Encode\n";
-		break;
-	case 'e':
+	}
+	else if (currentHandle == encoding)
+	{
 		tab << space << "Help" << space << " Decode " << space << " Info " << space << ">Encode<\n";
 	}
 
 	std::cout << tab.str();
 }
 
-void helptab()
+void minWindowSize()
 {
-	draw('h');
-	std::cout << "\nMove selection with arrow keys.\nLeft and right to switch tabs.\nEnter / Return key to interact with tab.\nEscape key to exit programme.\n\nUp and down to change options in this tab.\n\n\nConversion:\n\n Decimals\n Hexadecimals\n Octals";
-	if (GetAsyncKeyState(VK_RETURN))
-	{
-		gotoxy(0, conversion);
-		cursor.bVisible = true;
-		SetConsoleCursorInfo(currentHandle, &cursor);
-		while (GetAsyncKeyState(VK_RETURN))
-		{
-			sleep_for(100ms);
-		}
-		while (!GetAsyncKeyState(VK_RETURN))
-		{
-			if (VK_DOWN && conversion != 15)
-			{
-				conversion++;
-			}
-			else if (VK_UP && conversion != 13)
-			{
-				conversion--;
-			}
-			gotoxy(0, conversion);
-			sleep_for(100ms);
-		}
-	}
-	else if (GetAsyncKeyState(VK_RIGHT))
-	{
-		currentHandle = decoding;
-		SetConsoleActiveScreenBuffer(currentHandle);
-	}
-}
-
-int main()
-{
-	SetConsoleTitle(L"ASCII - Help");
-	cursor.dwSize = 100;
-	cursor.bVisible = false;
-	SetConsoleCursorInfo(currentHandle, &cursor);
-	SetWindow(43, 16);
-	SetWindow(44, 17);
 	while (!GetAsyncKeyState(VK_ESCAPE))
 	{
 		GetConsoleScreenBufferInfo(currentHandle, &screen);
@@ -149,6 +112,74 @@ int main()
 			SetWindow(screen.srWindow.Right + 1, 18);
 		}
 
+		draw();
+
+		sleep_for(50ms);
+	}
+}
+
+void helptab()
+{
+	std::cout << "\nMove selection with arrow keys.\nLeft and right to switch tabs.\nEnter / Return key to interact with tab.\nEscape key to exit programme.\n\nUp and down to change options in this tab.\n\n\nConversion:\n\n Decimals\n Hexadecimals\n Octals";
+	if (GetAsyncKeyState(VK_RETURN))
+	{
+		gotoxy(0, conversion);
+		cursor.bVisible = true;
+		SetConsoleCursorInfo(currentHandle, &cursor);
+
+		while (GetAsyncKeyState(VK_RETURN))
+		{
+			sleep_for(25ms);
+		}
+
+		while (!GetAsyncKeyState(VK_RETURN))
+		{
+			if (GetAsyncKeyState(VK_DOWN) && conversion != 14)
+			{
+				conversion++;
+				gotoxy(0, conversion);
+				sleep_for(500ms);
+			}
+			else if (GetAsyncKeyState(VK_UP) && conversion != 12)
+			{
+				conversion--;
+				gotoxy(0, conversion);
+				sleep_for(500ms);
+			}
+
+			sleep_for(25ms);
+		}
+
+		while (GetAsyncKeyState(VK_RETURN))
+		{
+			sleep_for(25ms);
+		}
+
+		cursor.bVisible = false;
+		SetConsoleCursorInfo(currentHandle, &cursor);
+	}
+	else if (GetAsyncKeyState(VK_RIGHT))
+	{
+		currentHandle = decoding;
+		SetConsoleActiveScreenBuffer(currentHandle);
+	}
+}
+
+void decode()
+{
+}
+
+int main()
+{
+	SetConsoleTitle(L"ASCII - Help");
+	cursor.dwSize = 100;
+	cursor.bVisible = false;
+	SetConsoleCursorInfo(currentHandle, &cursor);
+	SetWindow(43, 16);
+	SetWindow(44, 17);
+	std::thread resize(minWindowSize);
+	while (!GetAsyncKeyState(VK_ESCAPE))
+	{
 		if (currentHandle == decoding)
 		{
 			if (GetAsyncKeyState(VK_RETURN))
@@ -191,9 +222,9 @@ int main()
 			helptab();
 		}
 
-		sleep_for(100ms);
-		clear();
+		_getch();
 	}
+	resize.join();
     return 0;
 }
 
