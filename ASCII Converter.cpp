@@ -1,16 +1,10 @@
-// ASCII Converter.cpp : Defines the entry point for the console application.
-//
-
 #include <iostream>
 #include <string>
 #include <sstream>
 #include <Windows.h>
 #include <thread> 
 #include <chrono>
-#include <conio.h>
 
-using namespace std::this_thread;
-using namespace std::chrono_literals;
 
 HANDLE help = GetStdHandle(STD_OUTPUT_HANDLE);
 HANDLE decoding = CreateConsoleScreenBuffer(GENERIC_WRITE | GENERIC_READ, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
@@ -23,6 +17,7 @@ CONSOLE_SCREEN_BUFFER_INFO screen;
 CONSOLE_CURSOR_INFO cursor;
 
 int conversion = 12;
+bool windowChange = false;
 
 void SetWindow(int width, int height)
 {
@@ -98,29 +93,50 @@ void draw()
 	std::cout << tab.str();
 }
 
-void minWindowSize()
+void windowWatch()
 {
+	SMALL_RECT windowOld = screen.srWindow;
+	draw();
 	while (!GetAsyncKeyState(VK_ESCAPE))
 	{
 		GetConsoleScreenBufferInfo(currentHandle, &screen);
-		if (screen.srWindow.Right < 43)
+		if (windowOld.Bottom == screen.srWindow.Bottom && windowOld.Right == screen.srWindow.Right)
 		{
-			SetWindow(44, screen.srWindow.Bottom + 1);
+			std::this_thread::sleep_for(std::chrono::milliseconds(25));
+			windowChange = false;
 		}
-		if (screen.srWindow.Bottom < 17)
+		else
 		{
-			SetWindow(screen.srWindow.Right + 1, 18);
+			clear();
+
+			if (screen.srWindow.Right < 43)
+			{
+				SetWindow(44, screen.srWindow.Bottom + 1);
+			}
+			if (screen.srWindow.Bottom < 17)
+			{
+				SetWindow(screen.srWindow.Right + 1, 18);
+			}
+
+			draw();
+
+			windowChange = true;
+
+			windowOld = screen.srWindow;
 		}
-
-		draw();
-
-		sleep_for(50ms);
 	}
 }
 
 void helptab()
 {
-	std::cout << "\nMove selection with arrow keys.\nLeft and right to switch tabs.\nEnter / Return key to interact with tab.\nEscape key to exit programme.\n\nUp and down to change options in this tab.\n\n\nConversion:\n\n Decimals\n Hexadecimals\n Octals";
+	gotoxy(0, 3);
+	std::cout << "Move selection with arrow keys.\nLeft and right to switch tabs.\nEnter / Return key to interact with tab.\nEscape key to exit programme.\n\nUp and down to change options in this tab.\n\n\nConversion:\n\n Decimals\n Hexadecimals\n Octals";
+	
+	while (!windowChange || !GetAsyncKeyState(VK_RETURN) || !GetAsyncKeyState(VK_RIGHT) || !GetAsyncKeyState(VK_ESCAPE))
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(25));
+	}
+
 	if (GetAsyncKeyState(VK_RETURN))
 	{
 		gotoxy(0, conversion);
@@ -129,7 +145,7 @@ void helptab()
 
 		while (GetAsyncKeyState(VK_RETURN))
 		{
-			sleep_for(25ms);
+			std::this_thread::sleep_for(std::chrono::milliseconds(25));
 		}
 
 		while (!GetAsyncKeyState(VK_RETURN))
@@ -138,21 +154,21 @@ void helptab()
 			{
 				conversion++;
 				gotoxy(0, conversion);
-				sleep_for(500ms);
+				std::this_thread::sleep_for(std::chrono::milliseconds(500));
 			}
 			else if (GetAsyncKeyState(VK_UP) && conversion != 12)
 			{
 				conversion--;
 				gotoxy(0, conversion);
-				sleep_for(500ms);
+				std::this_thread::sleep_for(std::chrono::milliseconds(500));
 			}
 
-			sleep_for(25ms);
+			std::this_thread::sleep_for(std::chrono::milliseconds(25));
 		}
 
 		while (GetAsyncKeyState(VK_RETURN))
 		{
-			sleep_for(25ms);
+			std::this_thread::sleep_for(std::chrono::milliseconds(25));
 		}
 
 		cursor.bVisible = false;
@@ -169,6 +185,14 @@ void decode()
 {
 }
 
+void infotab()
+{
+}
+
+void encode()
+{
+}
+
 int main()
 {
 	SetConsoleTitle(L"ASCII - Help");
@@ -177,54 +201,27 @@ int main()
 	SetConsoleCursorInfo(currentHandle, &cursor);
 	SetWindow(43, 16);
 	SetWindow(44, 17);
-	std::thread resize(minWindowSize);
+	std::thread window(windowWatch);
 	while (!GetAsyncKeyState(VK_ESCAPE))
 	{
 		if (currentHandle == decoding)
 		{
-			if (GetAsyncKeyState(VK_RETURN))
-			{
-
-			}
-			else if (GetAsyncKeyState(VK_RIGHT))
-			{
-
-			}
-			else if (GetAsyncKeyState(VK_LEFT))
-			{
-
-			}
+			decode();
 		}
 		else if (currentHandle == info)
 		{
-			if (GetAsyncKeyState(VK_RIGHT))
-			{
-
-			}
-			else if (GetAsyncKeyState(VK_LEFT))
-			{
-
-			}
+			infotab();
 		}
 		else if (currentHandle == encoding)
 		{
-			if (GetAsyncKeyState(VK_RETURN))
-			{
-
-			}
-			else if (GetAsyncKeyState(VK_LEFT))
-			{
-
-			}
+			encode();
 		}
 		else
 		{
 			helptab();
 		}
-
-		_getch();
 	}
-	resize.join();
+	window.join();
     return 0;
 }
 
