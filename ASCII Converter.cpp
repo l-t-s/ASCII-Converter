@@ -69,10 +69,6 @@ void draw()
 
 	gotoxy(0, 0);
 
-	for (int i = 0; i < screen.srWindow.Right; i++) std::cout << " ";
-
-	gotoxy(0, 0);
-
 	if (currentHandle == help)
 	{
 		tab << space << ">Help<" << space << " Decode " << space << " Info " << space << " Encode\n";
@@ -96,19 +92,17 @@ void draw()
 void windowWatch()
 {
 	SMALL_RECT windowOld = screen.srWindow;
+	LONG style = GetWindowLong(GetConsoleWindow(), GWL_STYLE);
 	draw();
 	while (!GetAsyncKeyState(VK_ESCAPE))
 	{
 		GetConsoleScreenBufferInfo(currentHandle, &screen);
 		if (windowOld.Bottom == screen.srWindow.Bottom && windowOld.Right == screen.srWindow.Right)
 		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(25));
 			windowChange = false;
 		}
 		else
 		{
-			clear();
-
 			if (screen.srWindow.Right < 43)
 			{
 				SetWindow(44, screen.srWindow.Bottom + 1);
@@ -118,12 +112,15 @@ void windowWatch()
 				SetWindow(screen.srWindow.Right + 1, 18);
 			}
 
+			clear();
+
 			draw();
 
 			windowChange = true;
 
 			windowOld = screen.srWindow;
 		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
 }
 
@@ -134,7 +131,7 @@ void helptab()
 	
 	while (!windowChange || !GetAsyncKeyState(VK_RETURN) || !GetAsyncKeyState(VK_RIGHT) || !GetAsyncKeyState(VK_ESCAPE))
 	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(25));
+		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
 
 	if (GetAsyncKeyState(VK_RETURN))
@@ -145,7 +142,7 @@ void helptab()
 
 		while (GetAsyncKeyState(VK_RETURN))
 		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(25));
+			std::this_thread::sleep_for(std::chrono::milliseconds(5));
 		}
 
 		while (!GetAsyncKeyState(VK_RETURN))
@@ -163,12 +160,12 @@ void helptab()
 				std::this_thread::sleep_for(std::chrono::milliseconds(500));
 			}
 
-			std::this_thread::sleep_for(std::chrono::milliseconds(25));
+			std::this_thread::sleep_for(std::chrono::milliseconds(5));
 		}
 
 		while (GetAsyncKeyState(VK_RETURN))
 		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(25));
+			std::this_thread::sleep_for(std::chrono::milliseconds(5));
 		}
 
 		cursor.bVisible = false;
@@ -220,6 +217,7 @@ int main()
 		{
 			helptab();
 		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
 	window.join();
     return 0;
