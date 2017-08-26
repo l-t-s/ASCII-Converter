@@ -17,10 +17,8 @@ CONSOLE_SCREEN_BUFFER_INFO screen;
 CONSOLE_CURSOR_INFO cursor;
 
 int conversion = 12;
-bool windowChange = false;
 
-void SetWindow(int width, int height)
-{
+void SetWindow(int width, int height) {
 	_COORD coord;
 	coord.X = width;
 	coord.Y = height;
@@ -34,8 +32,7 @@ void SetWindow(int width, int height)
 	SetConsoleWindowInfo(currentHandle, TRUE, &screen.srWindow);
 }
 
-void clear() 
-{
+void clear() {
 	COORD topLeft = { 0, 0 };
 
 	GetConsoleScreenBufferInfo(currentHandle, &screen);
@@ -49,112 +46,56 @@ void clear()
 	SetConsoleCursorPosition(currentHandle, topLeft);
 }
 
-void gotoxy(int x, int y) 
-{
+void gotoxy(int x, int y) {
 	COORD coord;
 	coord.X = x;
 	coord.Y = y;
 	SetConsoleCursorPosition(currentHandle, coord);
 }
 
-void draw()
-{
+void draw() {
 	std::string space = "";
 	std::stringstream tab;
 
-	for (int i = 0; i < (screen.srWindow.Right - 28) / 5; i++)
-	{
+	for (int i = 0; i < (screen.srWindow.Right - 28) / 5; i++) {
 		space.append(" ");
 	}
 
-	gotoxy(0, 0);
-
-	if (currentHandle == help)
-	{
+	if (currentHandle == help) {
 		tab << space << ">Help<" << space << " Decode " << space << " Info " << space << " Encode\n";
-	}
-	else if (currentHandle == decoding)
-	{
+	} else if (currentHandle == decoding) {
 		tab << space << "Help" << space << ">Decode<" << space << " Info " << space << " Encode\n";
-	}
-	else if (currentHandle == info)
-	{
+	} else if (currentHandle == info) {
 		tab << space << "Help" << space << " Decode " << space << ">Info<" << space << " Encode\n";
-	}
-	else if (currentHandle == encoding)
-	{
+	} else {
 		tab << space << "Help" << space << " Decode " << space << " Info " << space << ">Encode<\n";
 	}
 
+	gotoxy(0, 0);
 	std::cout << tab.str();
-}
 
-void windowWatch()
-{
-	SMALL_RECT windowOld = screen.srWindow;
-	LONG style = GetWindowLong(GetConsoleWindow(), GWL_STYLE);
-	draw();
-	while (!GetAsyncKeyState(VK_ESCAPE))
-	{
-		GetConsoleScreenBufferInfo(currentHandle, &screen);
-		if (windowOld.Bottom == screen.srWindow.Bottom && windowOld.Right == screen.srWindow.Right)
-		{
-			windowChange = false;
-		}
-		else
-		{
-			if (screen.srWindow.Right < 43)
-			{
-				SetWindow(44, screen.srWindow.Bottom + 1);
-			}
-			if (screen.srWindow.Bottom < 17)
-			{
-				SetWindow(screen.srWindow.Right + 1, 18);
-			}
-
-			clear();
-
-			draw();
-
-			windowChange = true;
-
-			windowOld = screen.srWindow;
-		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(5));
+	if (currentHandle == help) {
+		gotoxy(0, 3);
+		std::cout << "Move selection with arrow keys.\nLeft and right to switch tabs.\nEnter / Return key to interact with tab.\nEscape key to exit programme.\n\nUp and down to change options in this tab.\n\n\nConversion:\n\n Decimals\n Hexadecimals\n Octals";
 	}
 }
 
-void helptab()
-{
-	gotoxy(0, 3);
-	std::cout << "Move selection with arrow keys.\nLeft and right to switch tabs.\nEnter / Return key to interact with tab.\nEscape key to exit programme.\n\nUp and down to change options in this tab.\n\n\nConversion:\n\n Decimals\n Hexadecimals\n Octals";
-	
-	while (!windowChange || !GetAsyncKeyState(VK_RETURN) || !GetAsyncKeyState(VK_RIGHT) || !GetAsyncKeyState(VK_ESCAPE))
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(5));
-	}
-
-	if (GetAsyncKeyState(VK_RETURN))
-	{
+void helptab() {
+	if (GetAsyncKeyState(VK_RETURN)) {
 		gotoxy(0, conversion);
 		cursor.bVisible = true;
 		SetConsoleCursorInfo(currentHandle, &cursor);
 
-		while (GetAsyncKeyState(VK_RETURN))
-		{
+		while (GetAsyncKeyState(VK_RETURN)) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(5));
 		}
 
-		while (!GetAsyncKeyState(VK_RETURN))
-		{
-			if (GetAsyncKeyState(VK_DOWN) && conversion != 14)
-			{
+		while (!GetAsyncKeyState(VK_RETURN)) {
+			if (GetAsyncKeyState(VK_DOWN) && conversion != 14) {
 				conversion++;
 				gotoxy(0, conversion);
 				std::this_thread::sleep_for(std::chrono::milliseconds(500));
-			}
-			else if (GetAsyncKeyState(VK_UP) && conversion != 12)
-			{
+			} else if (GetAsyncKeyState(VK_UP) && conversion != 12) {
 				conversion--;
 				gotoxy(0, conversion);
 				std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -163,63 +104,50 @@ void helptab()
 			std::this_thread::sleep_for(std::chrono::milliseconds(5));
 		}
 
-		while (GetAsyncKeyState(VK_RETURN))
-		{
+		while (GetAsyncKeyState(VK_RETURN)) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(5));
 		}
 
 		cursor.bVisible = false;
 		SetConsoleCursorInfo(currentHandle, &cursor);
-	}
-	else if (GetAsyncKeyState(VK_RIGHT))
-	{
+	} else if (GetAsyncKeyState(VK_RIGHT)) {
 		currentHandle = decoding;
 		SetConsoleActiveScreenBuffer(currentHandle);
 	}
 }
 
-void decode()
-{
+void decode() {
+
 }
 
-void infotab()
-{
+void infotab() {
+
 }
 
-void encode()
-{
+void encode() {
+
 }
 
-int main()
-{
+int main() {
 	SetConsoleTitle(L"ASCII - Help");
 	cursor.dwSize = 100;
 	cursor.bVisible = false;
 	SetConsoleCursorInfo(currentHandle, &cursor);
 	SetWindow(43, 16);
 	SetWindow(44, 17);
-	std::thread window(windowWatch);
-	while (!GetAsyncKeyState(VK_ESCAPE))
-	{
-		if (currentHandle == decoding)
-		{
+	while (!GetAsyncKeyState(VK_ESCAPE)) {
+		draw();
+
+		if (currentHandle == decoding) {
 			decode();
-		}
-		else if (currentHandle == info)
-		{
+		} else if (currentHandle == info) {
 			infotab();
-		}
-		else if (currentHandle == encoding)
-		{
+		} else if (currentHandle == encoding) {
 			encode();
-		}
-		else
-		{
+		} else {
 			helptab();
 		}
 		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
-	window.join();
     return 0;
 }
-
