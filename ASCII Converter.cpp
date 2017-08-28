@@ -109,8 +109,7 @@ void draw() {
 void helptab() {
 	if (GetAsyncKeyState(VK_RETURN)) {
 		gotoxy(0, conversion);
-		cursor.bVisible = true;
-		SetConsoleCursorInfo(console, &cursor);
+		std::cout << ">";
 
 		while (GetAsyncKeyState(VK_RETURN)) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(5));
@@ -118,61 +117,66 @@ void helptab() {
 
 		while (!GetAsyncKeyState(VK_RETURN)) {
 			if (GetAsyncKeyState(VK_DOWN) && conversion != 14) {
+				gotoxy(0, conversion);
+				std::cout << " ";
 				conversion++;
 				gotoxy(0, conversion);
-				std::this_thread::sleep_for(std::chrono::milliseconds(500));
+				std::cout << ">";
 			} else if (GetAsyncKeyState(VK_UP) && conversion != 12) {
+				gotoxy(0, conversion);
+				std::cout << " ";
 				conversion--;
 				gotoxy(0, conversion);
-				std::this_thread::sleep_for(std::chrono::milliseconds(500));
+				std::cout << ">";
+			}
+
+			switch (conversion) {
+				case 12:
+					SetConsoleTitle(L"ASCII - Decimals");
+					break;
+				case 13:
+					SetConsoleTitle(L"ASCII - Hexadecimals");
+					break;
+				case 14:
+					SetConsoleTitle(L"ASCII - Octals");
+					break;
+			}
+
+			while (GetAsyncKeyState(VK_DOWN) || GetAsyncKeyState(VK_UP)) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(5));
 			}
 
 			std::this_thread::sleep_for(std::chrono::milliseconds(5));
 		}
-
-		cursor.bVisible = false;
-		SetConsoleCursorInfo(console, &cursor);
 	} else if (GetAsyncKeyState(VK_RIGHT)) {
-		while (GetAsyncKeyState(VK_RETURN)) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(5));
-		}
 		tab = 2;
-		SetConsoleTitle(L"ASCII - Decode");
 	}
 }
 
 void decode() {
 	if (GetAsyncKeyState(VK_LEFT)) {
-		while (GetAsyncKeyState(VK_RETURN)) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(5));
-		}
 		tab = 1;
-		SetConsoleTitle(L"ASCII - Help");
 	} else if (GetAsyncKeyState(VK_RIGHT)) {
 		tab = 3;
-		SetConsoleTitle(L"ASCII - Info");
 	}
 }
 
 void infotab() {
 	if (GetAsyncKeyState(VK_LEFT)) {
 		tab = 2;
-		SetConsoleTitle(L"ASCII - Decode");
 	} else if (GetAsyncKeyState(VK_RIGHT)) {
 		tab = 4;
-		SetConsoleTitle(L"ASCII - Encode");
 	}
 }
 
 void encode() {
 	if (GetAsyncKeyState(VK_LEFT)) {
 		tab = 3;
-		SetConsoleTitle(L"ASCII - Info");
 	}
 }
 
 int main() {
-	SetConsoleTitle(L"ASCII - Help");
+	SetConsoleTitle(L"ASCII - Decimals");
 
 	cursor.dwSize = 100;
 
@@ -204,7 +208,6 @@ int main() {
 			std::this_thread::sleep_for(std::chrono::milliseconds(5));
 		}
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(25));
 		waitForUpdate();
 	}
     return 0;
