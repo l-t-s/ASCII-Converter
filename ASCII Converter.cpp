@@ -115,8 +115,7 @@ void draw() {
 			}
 			y.Y = i + 2;
 			if (i + view != 1 || i + view != 2 || i + view != 103) {
-				LPCTSTR print = items[i + view] + characters[i + view];
-				WriteConsoleOutputCharacter(console, print, lstrlen(items[i + view]), y, &written);
+				WriteConsoleOutputCharacter(console, items[i + view], lstrlen(items[i + view]), y, &written);
 				//std::cout << items[i + view] << characters[i + view];
 			}
 		}
