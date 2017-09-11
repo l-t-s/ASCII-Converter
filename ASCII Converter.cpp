@@ -3,7 +3,8 @@
 #include <Windows.h>
 #include <thread> 
 #include <chrono>
-
+#include <cctype>
+#include <conio.h>
 
 HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
 
@@ -14,8 +15,9 @@ CONSOLE_CURSOR_INFO cursor;
 unsigned int tab = 1;
 unsigned int conversion = 12;
 unsigned int view = 0;
-unsigned int characters[105];
-LPCTSTR items[] = { L"Length: ", L"",  L"Number of:", L"    Spaces ( )                      ", L"    Exclamations (!)                ", L"    Quotations (\x22)                  ", L"    Hashes(#)                       ", L"    Dollars($)                      ", L"    Percents(%)                     ", L"    Ampersands(&)                   ", L"    Apostrophes(')                  ", L"    Opening Parentheses (()         ", L"    Closing Parentheses ())         ", L"    Asterisks (*)                   ", L"    Plusses (+)                     ", L"    Commas (,)                      ", L"    Dashes (-)                      ", L"    Periods (.)                     ", L"    Slashes (/)                     ", L"    Colons (:)                      ", L"    Semi-Colons (;)                 ", L"    Lesser Than Quillemets (<)      ", L"    Equals (=)                      ", L"    Greater Than Quillemets (>)     ", L"    Questions (?)                   ", L"    Ats (@)                         ", L"    Opening Braces ([)              ", L"    Backslashes (\\)                 ", L"    Closing Braces (])              ", L"    Carets (^)                      ", L"    Underscore (_)                  ", L"    Graves (`)                      ", L"    Opening Curly Brackets ({)      ", L"    Vertical Bars (|)               ", L"    Closing Curly Brackets (})      ", L"    Tildes (~)                      ", L"    Pounds (£)                      ", L"    Micros (µ)                      ", L"    Obeluses (÷)                    ", L"    Degrees (°)                     ", L"    No-Breaking Spaces ( )          ", L"    1                               ", L"    2                               ", L"    3                               ", L"    4                               ", L"    5                               ", L"    6                               ", L"    7                               ", L"    8                               ", L"    9                               ", L"    0                               ", L"    A                               ", L"    B                               ", L"    C                               ", L"    D                               ", L"    E                               ",  L"    F                               ", L"    G                               ", L"    H                               ", L"    I                               ", L"    J                               ", L"    K                               ", L"    L                               ", L"    M                               ", L"    N                               ", L"    O                               ", L"    P                               ", L"    Q                               ", L"    R                               ", L"    S                               ", L"    T                               ", L"    U                               ", L"    V                               ", L"    W                               ", L"    X                               ", L"    Y                               ", L"    Z                               ", L"    a                               ", L"    b                               ", L"    c                               ", L"    d                               ", L"    e                               ", L"    f                               ", L"    g                               ", L"    h                               ", L"    i                               ", L"    j                               ", L"    k                               ", L"    l                               ", L"    m                               ", L"    n                               ", L"    o                               ", L"    p                               ", L"    q                               ", L"    r                               ", L"    s                               ", L"    t                               ", L"    u                               " , L"    v                               ", L"    w                               ", L"    x                               ", L"    y                               ", L"    z                               ", L"", L"Unrecognized characters:            " };
+char base[] = { "" };
+unsigned int characters[101];
+std::string items[] = { "Length: ", "\nNumber of:\n    Spaces ( )                      ", "    Exclamations (!)                ", "    Quotations (\x22)                  ", "    Hashes(#)                       ", "    Dollars($)                      ", "    Percents(%)                     ", "    Ampersands(&)                   ", "    Apostrophes(')                  ", "    Opening Parentheses (()         ", "    Closing Parentheses ())         ", "    Asterisks (*)                   ", "    Plusses (+)                     ", "    Commas (,)                      ", "    Dashes (-)                      ", "    Periods (.)                     ", "    Slashes (/)                     ", "    Colons (:)                      ", "    Semi-Colons (;)                 ", "    Lesser Than Quillemets (<)      ", "    Equals (=)                      ", "    Greater Than Quillemets (>)     ", "    Questions (?)                   ", "    Ats (@)                         ", "    Opening Braces ([)              ", "    Backslashes (\\)                 ", "    Closing Braces (])              ", "    Carets (^)                      ", "    Underscore (_)                  ", "    Graves (`)                      ", "    Opening Curly Brackets ({)      ", "    Vertical Bars (|)               ", "    Closing Curly Brackets (})      ", "    Tildes (~)                      ", "    Pounds (£)                      ", "    Micros (µ)                      ", "    Obeluses (÷)                    ", "    Degrees (°)                     ", "    No-Breaking Spaces ( )          ", "    1                               ", "    2                               ", "    3                               ", "    4                               ", "    5                               ", "    6                               ", "    7                               ", "    8                               ", "    9                               ", "    0                               ", "    A                               ", "    B                               ", "    C                               ", "    D                               ", "    E                               ",  "    F                               ", "    G                               ", "    H                               ", "    I                               ", "    J                               ", "    K                               ", "    L                               ", "    M                               ", "    N                               ", "    O                               ", "    P                               ", "    Q                               ", "    R                               ", "    S                               ", "    T                               ", "    U                               ", "    V                               ", "    W                               ", "    X                               ", "    Y                               ", "    Z                               ", "    a                               ", "    b                               ", "    c                               ", "    d                               ", "    e                               ", "    f                               ", "    g                               ", "    h                               ", "    i                               ", "    j                               ", "    k                               ", "    l                               ", "    m                               ", "    n                               ", "    o                               ", "    p                               ", "    q                               ", "    r                               ", "    s                               ", "    t                               ", "    u                               " , "    v                               ", "    w                               ", "    x                               ", "    y                               ", "    z                               ", "\nUnrecognized characters:            " };
 
 void SetWindow(int width, int height) {
 	_COORD coord;
@@ -90,34 +92,23 @@ void draw() {
 		break;
 	}
 
-	gotoxy(0, 2);
 	switch (tab) {
 	case 1:
-		WriteConsoleOutputCharacter(console, L"Move selection with arrow keys.", 31, { 0, 2 }, &written);
-		WriteConsoleOutputCharacter(console, L"Left and right to switch tabs.", 30, { 0, 3 }, &written);
-		WriteConsoleOutputCharacter(console, L"Enter / Return key to interact with tab.", 40, { 0, 4 }, &written);
-		WriteConsoleOutputCharacter(console, L"Escape key to exit programme.", 29, { 0, 5 }, &written);
-		WriteConsoleOutputCharacter(console, L"Up and down to change options in this tab.", 42, { 0, 7 }, &written);
-		WriteConsoleOutputCharacter(console, L"Conversion:", 11, { 0, 10 }, &written);
-		WriteConsoleOutputCharacter(console, L"Decimals", 8, { 1, 12 }, &written);
-		WriteConsoleOutputCharacter(console, L"Hexadecimals", 12, { 1, 13 }, &written);
-		WriteConsoleOutputCharacter(console, L"Octals", 6, { 1, 14 }, &written);
-		//std::cout << "Move selection with arrow keys.\nLeft and right to switch tabs.\nEnter / Return key to interact with tab.\nEscape key to exit programme.\n\nUp and down to change options in this tab.\n\n\nConversion:\n\n Decimals\n Hexadecimals\n Octals";
+		gotoxy(0, 2);
+		std::cout << "Move selection with arrow keys.\nLeft and right to switch tabs.\nEnter / Return key to interact with tab.\nEscape key to exit programme.\n\nUp and down to change options in this tab.\n\n\nConversion:\n\n Decimals\n Hexadecimals\n Octals";
 		break;
 	case 2:
+		for (int i = 0; i < sizeof(base); i++) {
+			std::cout << base[i];
+		}
 		break;
 	case 3:
-		COORD y;
-		y.X = 0;
+		gotoxy(0, 2);
 		for (int i = 0; i <= screen.srWindow.Bottom - 5; i++) {
-			if (view + i > 105) {
+			if (view + i > 101) {
 				break;
 			}
-			y.Y = i + 2;
-			if (i + view != 1 || i + view != 2 || i + view != 103) {
-				WriteConsoleOutputCharacter(console, items[i + view], lstrlen(items[i + view]), y, &written);
-				//std::cout << items[i + view] << characters[i + view];
-			}
+			std::cout << items[i + view] << characters[i + view] << std::endl;
 		}
 		break;
 	case 4:
@@ -179,7 +170,47 @@ void helptab() {
 }
 
 void decode() {
-	if (GetAsyncKeyState(VK_LEFT)) {
+	if (GetAsyncKeyState(VK_RETURN)) {
+		unsigned int i = 0;
+		unsigned int x = 0;
+		cursor.bVisible = true;
+		SetConsoleCursorInfo(console, &cursor);
+
+		while (GetAsyncKeyState(VK_RETURN)) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(5));
+		}
+
+		while (!GetAsyncKeyState(VK_RETURN)) {
+			draw();
+			char thing = _getch();
+			if (thing = 0x7F) {
+				if (x == 0 && screen.dwCursorPosition.Y > 0) {
+					x = screen.srWindow.Right;
+					gotoxy(x, --screen.dwCursorPosition.Y);
+				} else if (x != 0) {
+					gotoxy(--x, screen.dwCursorPosition.Y);
+				}
+				base[i] = 32;
+				i--;
+			} else if (std::isprint(thing)) {
+				base[i] = thing;
+				i++;
+				if (x == screen.srWindow.Right) {
+					x = 0;
+					gotoxy(x, ++screen.dwCursorPosition.Y);
+				} else {
+					gotoxy(++x, screen.dwCursorPosition.Y);
+				}
+			}
+		}
+
+		cursor.bVisible = false;
+		SetConsoleCursorInfo(console, &cursor);
+
+		while (GetAsyncKeyState(VK_RETURN)) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(5));
+		}
+	} else if (GetAsyncKeyState(VK_LEFT)) {
 		tab = 1;
 	} else if (GetAsyncKeyState(VK_RIGHT)) {
 		tab = 3;
@@ -217,12 +248,12 @@ void encode() {
 int main() {
 	SetConsoleTitle(L"ASCII - Decimals");
 
-	cursor.dwSize = 100;
+	cursor.dwSize = 15;
 
 	SetWindow(45, 17);
 	SetWindow(46, 18);
 
-	for (int i = 0; i < 105; i++) {
+	for (int i = 0; i < 101; i++) {
 		characters[i] = 0;
 	}
 
