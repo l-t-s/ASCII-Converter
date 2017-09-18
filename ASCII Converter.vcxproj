@@ -136,8 +136,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ASCII Converter.cpp" />
+    <ClCompile Include="necessities.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="necessities.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>

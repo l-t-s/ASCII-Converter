@@ -5,12 +5,11 @@
 #include <chrono>
 #include <cctype>
 #include <conio.h>
+#include "necessities.h"
 
-HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
-
-DWORD written;
-CONSOLE_SCREEN_BUFFER_INFO screen;
 CONSOLE_CURSOR_INFO cursor;
+HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+CONSOLE_SCREEN_BUFFER_INFO screen;
 
 unsigned int tab = 1;
 unsigned int conversion = 12;
@@ -18,42 +17,6 @@ unsigned int view = 0;
 char base[] = { "" };
 unsigned int characters[101];
 std::string items[] = { "Length: ", "\nNumber of:\n    Spaces ( )                      ", "    Exclamations (!)                ", "    Quotations (\x22)                  ", "    Hashes(#)                       ", "    Dollars($)                      ", "    Percents(%)                     ", "    Ampersands(&)                   ", "    Apostrophes(')                  ", "    Opening Parentheses (()         ", "    Closing Parentheses ())         ", "    Asterisks (*)                   ", "    Plusses (+)                     ", "    Commas (,)                      ", "    Dashes (-)                      ", "    Periods (.)                     ", "    Slashes (/)                     ", "    Colons (:)                      ", "    Semi-Colons (;)                 ", "    Lesser Than Quillemets (<)      ", "    Equals (=)                      ", "    Greater Than Quillemets (>)     ", "    Questions (?)                   ", "    Ats (@)                         ", "    Opening Braces ([)              ", "    Backslashes (\\)                 ", "    Closing Braces (])              ", "    Carets (^)                      ", "    Underscore (_)                  ", "    Graves (`)                      ", "    Opening Curly Brackets ({)      ", "    Vertical Bars (|)               ", "    Closing Curly Brackets (})      ", "    Tildes (~)                      ", "    Pounds (£)                      ", "    Micros (µ)                      ", "    Obeluses (÷)                    ", "    Degrees (°)                     ", "    No-Breaking Spaces ( )          ", "    1                               ", "    2                               ", "    3                               ", "    4                               ", "    5                               ", "    6                               ", "    7                               ", "    8                               ", "    9                               ", "    0                               ", "    A                               ", "    B                               ", "    C                               ", "    D                               ", "    E                               ",  "    F                               ", "    G                               ", "    H                               ", "    I                               ", "    J                               ", "    K                               ", "    L                               ", "    M                               ", "    N                               ", "    O                               ", "    P                               ", "    Q                               ", "    R                               ", "    S                               ", "    T                               ", "    U                               ", "    V                               ", "    W                               ", "    X                               ", "    Y                               ", "    Z                               ", "    a                               ", "    b                               ", "    c                               ", "    d                               ", "    e                               ", "    f                               ", "    g                               ", "    h                               ", "    i                               ", "    j                               ", "    k                               ", "    l                               ", "    m                               ", "    n                               ", "    o                               ", "    p                               ", "    q                               ", "    r                               ", "    s                               ", "    t                               ", "    u                               " , "    v                               ", "    w                               ", "    x                               ", "    y                               ", "    z                               ", "\nUnrecognized characters:            " };
-
-void SetWindow(int width, int height) {
-	_COORD coord;
-	coord.X = width;
-	coord.Y = height;
-
-	screen.srWindow.Top = 0;
-	screen.srWindow.Left = 0;
-	screen.srWindow.Bottom = height - 1;
-	screen.srWindow.Right = width - 1;
-
-	SetConsoleWindowInfo(console, TRUE, &screen.srWindow);
-	SetConsoleScreenBufferSize(console, coord);
-}
-
-void clear() {
-	COORD topLeft = { 0, 0 };
-
-	GetConsoleScreenBufferInfo(console, &screen);
-	FillConsoleOutputCharacterA(
-		console, ' ', screen.dwSize.X * screen.dwSize.Y, topLeft, &written
-	);
-	FillConsoleOutputAttribute(
-		console, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE,
-		screen.dwSize.X * screen.dwSize.Y, topLeft, &written
-	);
-
-	SetConsoleCursorPosition(console, topLeft);
-}
-
-void gotoxy(int x, int y) {
-	COORD coord;
-	coord.X = x;
-	coord.Y = y;
-	SetConsoleCursorPosition(console, coord);
-}
 
 void waitForUpdate() {
 	CONSOLE_SCREEN_BUFFER_INFO screenOld = screen;
@@ -66,9 +29,9 @@ void waitForUpdate() {
 void draw() {
 	std::string space = "";
 
-	clear();
+	screen = necessities::clear();
 
-	SetWindow(screen.srWindow.Right + 1, screen.srWindow.Bottom + 1);
+	necessities::SetWindow(screen.srWindow.Right + 1, screen.srWindow.Bottom + 1);
 
 	if (screen.srWindow.Right > 0) {
 		for (int i = 0; i < (screen.srWindow.Right - 28) / 5; i++) {
@@ -76,7 +39,7 @@ void draw() {
 		}
 	}
 
-	gotoxy(0, 0);
+	necessities::gotoxy(0, 0);
 	switch (tab) {
 	case 1:
 		std::cout << space << ">Help<" << space << " Decode " << space << " Info " << space << " Encode" << space;
@@ -94,7 +57,7 @@ void draw() {
 
 	switch (tab) {
 	case 1:
-		gotoxy(0, 2);
+		necessities::gotoxy(0, 2);
 		std::cout << "Move selection with arrow keys.\nLeft and right to switch tabs.\nEnter / Return key to interact with tab.\nEscape key to exit programme.\n\nUp and down to change options in this tab.\n\n\nConversion:\n\n Decimals\n Hexadecimals\n Octals";
 		break;
 	case 2:
@@ -103,7 +66,7 @@ void draw() {
 		}
 		break;
 	case 3:
-		gotoxy(0, 2);
+		necessities::gotoxy(0, 2);
 		for (int i = 0; i <= screen.srWindow.Bottom - 5; i++) {
 			if (view + i > 101) {
 				break;
@@ -115,7 +78,7 @@ void draw() {
 		break;
 	}
 
-	gotoxy(screen.srWindow.Right, screen.srWindow.Bottom - 1);
+	necessities::gotoxy(0, 0);
 	std::cout << " ";
 
 	cursor.bVisible = false;
@@ -124,7 +87,7 @@ void draw() {
 
 void helptab() {
 	if (GetAsyncKeyState(VK_RETURN)) {
-		gotoxy(0, conversion);
+		necessities::gotoxy(0, conversion);
 		std::cout << ">";
 
 		while (GetAsyncKeyState(VK_RETURN)) {
@@ -133,16 +96,16 @@ void helptab() {
 
 		while (!GetAsyncKeyState(VK_RETURN)) {
 			if (GetAsyncKeyState(VK_DOWN) && conversion != 14) {
-				gotoxy(0, conversion);
+				necessities::gotoxy(0, conversion);
 				std::cout << " ";
 				conversion++;
-				gotoxy(0, conversion);
+				necessities::gotoxy(0, conversion);
 				std::cout << ">";
 			} else if (GetAsyncKeyState(VK_UP) && conversion != 12) {
-				gotoxy(0, conversion);
+				necessities::gotoxy(0, conversion);
 				std::cout << " ";
 				conversion--;
-				gotoxy(0, conversion);
+				necessities::gotoxy(0, conversion);
 				std::cout << ">";
 			}
 
@@ -186,9 +149,9 @@ void decode() {
 			if (thing = 0x7F) {
 				if (x == 0 && screen.dwCursorPosition.Y > 0) {
 					x = screen.srWindow.Right;
-					gotoxy(x, --screen.dwCursorPosition.Y);
+					necessities::gotoxy(x, --screen.dwCursorPosition.Y);
 				} else if (x != 0) {
-					gotoxy(--x, screen.dwCursorPosition.Y);
+					necessities::gotoxy(--x, screen.dwCursorPosition.Y);
 				}
 				base[i] = 32;
 				i--;
@@ -197,9 +160,9 @@ void decode() {
 				i++;
 				if (x == screen.srWindow.Right) {
 					x = 0;
-					gotoxy(x, ++screen.dwCursorPosition.Y);
+					necessities::gotoxy(x, ++screen.dwCursorPosition.Y);
 				} else {
-					gotoxy(++x, screen.dwCursorPosition.Y);
+					necessities::gotoxy(++x, screen.dwCursorPosition.Y);
 				}
 			}
 		}
@@ -250,8 +213,8 @@ int main() {
 
 	cursor.dwSize = 15;
 
-	SetWindow(45, 17);
-	SetWindow(46, 18);
+	necessities::SetWindow(45, 17);
+	necessities::SetWindow(46, 18);
 
 	for (int i = 0; i < 101; i++) {
 		characters[i] = 0;
@@ -288,7 +251,7 @@ int main() {
 		}
 
 		waitForUpdate();
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		std::this_thread::sleep_for(std::chrono::nanoseconds(100));
 	}
     return 0;
 }
