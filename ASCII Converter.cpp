@@ -7,7 +7,6 @@
 #include <conio.h>
 #include "necessities.h"
 
-CONSOLE_CURSOR_INFO cursor;
 HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
 CONSOLE_SCREEN_BUFFER_INFO screen;
 
@@ -31,7 +30,7 @@ void draw() {
 
 	screen = necessities::clear();
 
-	necessities::SetWindow(screen.srWindow.Right + 1, screen.srWindow.Bottom + 1);
+	necessities::setWindow(screen.srWindow.Right + 1, screen.srWindow.Bottom + 1);
 
 	if (screen.srWindow.Right > 0) {
 		for (int i = 0; i < (screen.srWindow.Right - 28) / 5; i++) {
@@ -39,7 +38,7 @@ void draw() {
 		}
 	}
 
-	necessities::gotoxy(0, 0);
+	necessities::goXY(0, 0);
 	switch (tab) {
 	case 1:
 		std::cout << space << ">Help<" << space << " Decode " << space << " Info " << space << " Encode" << space;
@@ -57,7 +56,7 @@ void draw() {
 
 	switch (tab) {
 	case 1:
-		necessities::gotoxy(0, 2);
+		necessities::goXY(0, 2);
 		std::cout << "Move selection with arrow keys.\nLeft and right to switch tabs.\nEnter / Return key to interact with tab.\nEscape key to exit programme.\n\nUp and down to change options in this tab.\n\n\nConversion:\n\n Decimals\n Hexadecimals\n Octals";
 		break;
 	case 2:
@@ -66,7 +65,7 @@ void draw() {
 		}
 		break;
 	case 3:
-		necessities::gotoxy(0, 2);
+		necessities::goXY(0, 2);
 		for (int i = 0; i <= screen.srWindow.Bottom - 5; i++) {
 			if (view + i > 101) {
 				break;
@@ -78,16 +77,15 @@ void draw() {
 		break;
 	}
 
-	necessities::gotoxy(0, 0);
+	necessities::goXY(0, 0);
 	std::cout << " ";
 
-	cursor.bVisible = false;
-	SetConsoleCursorInfo(console, &cursor);
+	necessities::setCursor(15, false);
 }
 
 void helptab() {
 	if (GetAsyncKeyState(VK_RETURN)) {
-		necessities::gotoxy(0, conversion);
+		necessities::goXY(0, conversion);
 		std::cout << ">";
 
 		while (GetAsyncKeyState(VK_RETURN)) {
@@ -96,16 +94,16 @@ void helptab() {
 
 		while (!GetAsyncKeyState(VK_RETURN)) {
 			if (GetAsyncKeyState(VK_DOWN) && conversion != 14) {
-				necessities::gotoxy(0, conversion);
+				necessities::goXY(0, conversion);
 				std::cout << " ";
 				conversion++;
-				necessities::gotoxy(0, conversion);
+				necessities::goXY(0, conversion);
 				std::cout << ">";
 			} else if (GetAsyncKeyState(VK_UP) && conversion != 12) {
-				necessities::gotoxy(0, conversion);
+				necessities::goXY(0, conversion);
 				std::cout << " ";
 				conversion--;
-				necessities::gotoxy(0, conversion);
+				necessities::goXY(0, conversion);
 				std::cout << ">";
 			}
 
@@ -136,8 +134,8 @@ void decode() {
 	if (GetAsyncKeyState(VK_RETURN)) {
 		unsigned int i = 0;
 		unsigned int x = 0;
-		cursor.bVisible = true;
-		SetConsoleCursorInfo(console, &cursor);
+
+		necessities::setCursor(15, true);
 
 		while (GetAsyncKeyState(VK_RETURN)) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(5));
@@ -149,26 +147,25 @@ void decode() {
 			if (thing = 0x7F) {
 				if (x == 0 && screen.dwCursorPosition.Y > 0) {
 					x = screen.srWindow.Right;
-					necessities::gotoxy(x, --screen.dwCursorPosition.Y);
+					necessities::goXY(x, --screen.dwCursorPosition.Y);
 				} else if (x != 0) {
-					necessities::gotoxy(--x, screen.dwCursorPosition.Y);
+					necessities::goXY(--x, screen.dwCursorPosition.Y);
 				}
-				base[i] = 32;
+				base[i] = (char)32;
 				i--;
 			} else if (std::isprint(thing)) {
 				base[i] = thing;
 				i++;
 				if (x == screen.srWindow.Right) {
 					x = 0;
-					necessities::gotoxy(x, ++screen.dwCursorPosition.Y);
+					necessities::goXY(x, ++screen.dwCursorPosition.Y);
 				} else {
-					necessities::gotoxy(++x, screen.dwCursorPosition.Y);
+					necessities::goXY(++x, screen.dwCursorPosition.Y);
 				}
 			}
 		}
 
-		cursor.bVisible = false;
-		SetConsoleCursorInfo(console, &cursor);
+		necessities::setCursor(15, false);
 
 		while (GetAsyncKeyState(VK_RETURN)) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(5));
@@ -209,12 +206,14 @@ void encode() {
 }
 
 int main() {
+
+
 	SetConsoleTitle(L"ASCII - Decimals");
 
-	cursor.dwSize = 15;
+	necessities::setCursor(15, false);
 
-	necessities::SetWindow(45, 17);
-	necessities::SetWindow(46, 18);
+	necessities::setWindow(45, 17);
+	necessities::setWindow(46, 18);
 
 	for (int i = 0; i < 101; i++) {
 		characters[i] = 0;
