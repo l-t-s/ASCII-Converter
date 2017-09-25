@@ -19,7 +19,7 @@ HWND necessities::getConsoleHwnd(void)
 	// Format a "unique" NewWindowTitle.
 
 	wsprintf((LPWSTR)pszNewWindowTitle, L"%d/%d",
-		GetTickCount(),
+		(int)GetTickCount64(),
 		GetCurrentProcessId());
 
 	// Change current window title.
@@ -187,7 +187,7 @@ void necessities::waitForMouseClick(void) {
 }
 
 void necessities::waitForKBHit(void) {
-	BYTE keys[256];
+	//BYTE keys[256];
 
 	while (1) {
 		if (GetAsyncKeyState(VK_BACK))
