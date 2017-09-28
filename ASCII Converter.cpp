@@ -1,11 +1,11 @@
+#include "necessities.h"
+#include <Windows.h>
+#include <cctype>
+#include <chrono>
+#include <conio.h>
 #include <iostream>
 #include <string>
-#include <Windows.h>
-#include <thread> 
-#include <chrono>
-#include <cctype>
-#include <conio.h>
-#include "necessities.h"
+#include <thread>
 
 HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
 CONSOLE_SCREEN_BUFFER_INFO screen;
@@ -25,7 +25,7 @@ void waitForUpdate() {
 	}
 }
 
-void draw() {
+void draw(int x, int y) {
 	std::string space = "";
 
 	screen = necessities::clear();
@@ -134,7 +134,7 @@ void decode() {
 	if (GetAsyncKeyState(VK_RETURN)) {
 		unsigned int i = 0;
 		unsigned int x = 0;
-		char thing;
+		int thing;
 
 		necessities::setCursor(15, true);
 		necessities::goXY(x, 2);
@@ -144,7 +144,7 @@ void decode() {
 		}
 
 		while (!GetAsyncKeyState(VK_RETURN)) {
-			draw();
+			draw(0, 2);
 			thing = _getch();
 			if (thing == 0x7F) {
 				if (x == 0 && screen.dwCursorPosition.Y > 2) {
@@ -158,7 +158,6 @@ void decode() {
 				i--;
 			} else if (std::isprint(thing)) {
 				base[i] = (char)thing;
-				
 				i++;
 				if (x == screen.srWindow.Right) {
 					x = 0;
@@ -240,7 +239,7 @@ int main() {
 				break;
 		}
 
-		draw();
+		draw(NULL, NULL);
 
 		while (GetAsyncKeyState(VK_RETURN) || GetAsyncKeyState(VK_LEFT) || GetAsyncKeyState(VK_RIGHT) || GetAsyncKeyState(VK_UP) || GetAsyncKeyState(VK_DOWN)) {
 			if (GetAsyncKeyState(VK_ESCAPE)) {
