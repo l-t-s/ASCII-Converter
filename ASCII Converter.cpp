@@ -5,6 +5,7 @@
 #include <conio.h>
 #include <iostream>
 #include <string>
+#include <vector>
 #include <thread>
 
 HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -13,7 +14,8 @@ CONSOLE_SCREEN_BUFFER_INFO screen;
 unsigned int tab = 1;
 unsigned int conversion = 12;
 unsigned int view = 0;
-char base[] = { ' ' };
+std::vector<char> input;
+std::string inputstr;
 unsigned int characters[101];
 std::string items[] = { "Length: ", "\nNumber of:\n    Spaces ( )                      ", "    Exclamations (!)                ", "    Quotations (\x22)                  ", "    Hashes(#)                       ", "    Dollars($)                      ", "    Percents(%)                     ", "    Ampersands(&)                   ", "    Apostrophes(')                  ", "    Opening Parentheses (()         ", "    Closing Parentheses ())         ", "    Asterisks (*)                   ", "    Plusses (+)                     ", "    Commas (,)                      ", "    Dashes (-)                      ", "    Periods (.)                     ", "    Slashes (/)                     ", "    Colons (:)                      ", "    Semi-Colons (;)                 ", "    Lesser Than Quillemets (<)      ", "    Equals (=)                      ", "    Greater Than Quillemets (>)     ", "    Questions (?)                   ", "    Ats (@)                         ", "    Opening Braces ([)              ", "    Backslashes (\\)                 ", "    Closing Braces (])              ", "    Carets (^)                      ", "    Underscore (_)                  ", "    Graves (`)                      ", "    Opening Curly Brackets ({)      ", "    Vertical Bars (|)               ", "    Closing Curly Brackets (})      ", "    Tildes (~)                      ", "    Pounds (£)                      ", "    Micros (µ)                      ", "    Obeluses (÷)                    ", "    Degrees (°)                     ", "    No-Breaking Spaces ( )          ", "    1                               ", "    2                               ", "    3                               ", "    4                               ", "    5                               ", "    6                               ", "    7                               ", "    8                               ", "    9                               ", "    0                               ", "    A                               ", "    B                               ", "    C                               ", "    D                               ", "    E                               ",  "    F                               ", "    G                               ", "    H                               ", "    I                               ", "    J                               ", "    K                               ", "    L                               ", "    M                               ", "    N                               ", "    O                               ", "    P                               ", "    Q                               ", "    R                               ", "    S                               ", "    T                               ", "    U                               ", "    V                               ", "    W                               ", "    X                               ", "    Y                               ", "    Z                               ", "    a                               ", "    b                               ", "    c                               ", "    d                               ", "    e                               ", "    f                               ", "    g                               ", "    h                               ", "    i                               ", "    j                               ", "    k                               ", "    l                               ", "    m                               ", "    n                               ", "    o                               ", "    p                               ", "    q                               ", "    r                               ", "    s                               ", "    t                               ", "    u                               " , "    v                               ", "    w                               ", "    x                               ", "    y                               ", "    z                               ", "\nUnrecognized characters:            " };
 
@@ -60,9 +62,7 @@ void draw(int x, int y) {
 		std::cout << "Move selection with arrow keys.\nLeft and right to switch tabs.\nEnter / Return key to interact with tab.\nEscape key to exit programme.\n\nUp and down to change options in this tab.\n\n\nConversion:\n\n Decimals\n Hexadecimals\n Octals";
 		break;
 	case 2:
-		for (int i = 0; i < sizeof(base); i++) {
-			std::cout << base[i];
-		}
+		std::cout << inputstr;
 		break;
 	case 3:
 		necessities::goXY(0, 2);
@@ -154,10 +154,10 @@ void decode() {
 					x--;
 					necessities::goXY(x, screen.dwCursorPosition.Y);
 				}
-				base[i] = (char)32;
+				input.push_back(thing);
 				i--;
 			} else if (std::isprint(thing)) {
-				base[i] = (char)thing;
+				input.push_back(thing);
 				i++;
 				if (x == screen.srWindow.Right) {
 					x = 0;
