@@ -27,7 +27,7 @@ void waitForUpdate() {
 	}
 }
 
-void draw(int x, int y) {
+void draw() {
 	std::string space = "";
 
 	screen = necessities::clear();
@@ -43,44 +43,50 @@ void draw(int x, int y) {
 	necessities::goXY(0, 0);
 	switch (tab) {
 	case 1:
-		std::cout << space << ">Help<" << space << " Decode " << space << " Info " << space << " Encode" << space;
+		std::cout << space << ">Help<" << space << " Decode " << space << " Info " << space << " Encode " << space;
 		break;
 	case 2:
-		std::cout << space << "Help" << space << ">Decode<" << space << " Info " << space << " Encode" << space;
+		std::cout << space << " Help " << space << ">Decode<" << space << " Info " << space << " Encode " << space;
 		break;
 	case 3:
-		std::cout << space << "Help" << space << " Decode " << space << ">Info<" << space << " Encode" << space;
+		std::cout << space << " Help " << space << " Decode " << space << ">Info<" << space << " Encode " << space;
 		break;
 	case 4:
-		std::cout << space << "Help" << space << " Decode " << space << " Info " << space << ">Encode<" << space;
+		std::cout << space << " Help " << space << " Decode " << space << " Info " << space << ">Encode<" << space;
 		break;
 	}
 
+	necessities::goXY(0, 2);
+
 	switch (tab) {
 	case 1:
-		necessities::goXY(0, 2);
 		std::cout << "Move selection with arrow keys.\nLeft and right to switch tabs.\nEnter / Return key to interact with tab.\nEscape key to exit programme.\n\nUp and down to change options in this tab.\n\n\nConversion:\n\n Decimals\n Hexadecimals\n Octals";
+		necessities::goXY(0, 0);
+		std::cout << " ";
+
+		necessities::setCursor(15, false);
 		break;
 	case 2:
+		necessities::goXY(0, 2);
 		std::cout << inputstr;
+		//necessities::goXY(x, y);
 		break;
 	case 3:
-		necessities::goXY(0, 2);
 		for (int i = 0; i <= screen.srWindow.Bottom - 5; i++) {
 			if (view + i > 101) {
 				break;
 			}
 			std::cout << items[i + view] << characters[i + view] << std::endl;
 		}
+		necessities::goXY(0, 0);
+		std::cout << " ";
+
+		necessities::setCursor(15, false);
 		break;
 	case 4:
 		break;
 	}
 
-	necessities::goXY(0, 0);
-	std::cout << " ";
-
-	necessities::setCursor(15, false);
 }
 
 void helptab() {
@@ -132,9 +138,9 @@ void helptab() {
 
 void decode() {
 	if (GetAsyncKeyState(VK_RETURN)) {
-		unsigned int i = 0;
-		unsigned int x = 0;
-		int thing;
+		int i = 0;
+		int x = 0;
+		char thing;
 
 		necessities::setCursor(15, true);
 		necessities::goXY(x, 2);
@@ -144,29 +150,19 @@ void decode() {
 		}
 
 		while (!GetAsyncKeyState(VK_RETURN)) {
-			draw(0, 2);
 			thing = _getch();
-			if (thing == 0x7F) {
-				if (x == 0 && screen.dwCursorPosition.Y > 2) {
-					x = screen.srWindow.Right;
-					necessities::goXY(x, --screen.dwCursorPosition.Y);
-				} else if (x != 0) {
-					x--;
-					necessities::goXY(x, screen.dwCursorPosition.Y);
+
+			if (thing == '\b') {
+				if (inputstr.length() > 0) {
+					inputstr.pop_back();
+					i--;
 				}
-				input.push_back(thing);
-				i--;
 			} else if (std::isprint(thing)) {
-				input.push_back(thing);
+				inputstr.push_back(thing);
 				i++;
-				if (x == screen.srWindow.Right) {
-					x = 0;
-					necessities::goXY(x, ++screen.dwCursorPosition.Y);
-				} else {
-					x++;
-					necessities::goXY(x, screen.dwCursorPosition.Y);
-				}
 			}
+
+			draw();
 		}
 
 		necessities::setCursor(15, false);
@@ -239,7 +235,7 @@ int main() {
 				break;
 		}
 
-		draw(NULL, NULL);
+		draw();
 
 		while (GetAsyncKeyState(VK_RETURN) || GetAsyncKeyState(VK_LEFT) || GetAsyncKeyState(VK_RIGHT) || GetAsyncKeyState(VK_UP) || GetAsyncKeyState(VK_DOWN)) {
 			if (GetAsyncKeyState(VK_ESCAPE)) {
