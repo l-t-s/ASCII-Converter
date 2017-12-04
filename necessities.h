@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>
+#include <vector>
 
 class necessities {
 public:
@@ -15,4 +16,5 @@ public:
 	static void waitForMouseMove(void);
 	static void waitForMouseClick(void);
 	static void waitForKBHit(void);
+	static std::vector<byte> waitForAction(bool includeMouseMovement);
 };

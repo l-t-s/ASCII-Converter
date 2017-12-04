@@ -15,7 +15,7 @@ unsigned int tab = 1;
 unsigned int conversion = 12;
 unsigned int view = 0;
 std::vector<char> input;
-std::string inputstr;
+std::string decoded;
 unsigned int characters[101];
 std::string items[] = { "Length: ", "\nNumber of:\n    Spaces ( )                      ", "    Exclamations (!)                ", "    Quotations (\x22)                  ", "    Hashes(#)                       ", "    Dollars($)                      ", "    Percents(%)                     ", "    Ampersands(&)                   ", "    Apostrophes(')                  ", "    Opening Parentheses (()         ", "    Closing Parentheses ())         ", "    Asterisks (*)                   ", "    Plusses (+)                     ", "    Commas (,)                      ", "    Dashes (-)                      ", "    Periods (.)                     ", "    Slashes (/)                     ", "    Colons (:)                      ", "    Semi-Colons (;)                 ", "    Lesser Than Quillemets (<)      ", "    Equals (=)                      ", "    Greater Than Quillemets (>)     ", "    Questions (?)                   ", "    Ats (@)                         ", "    Opening Braces ([)              ", "    Backslashes (\\)                 ", "    Closing Braces (])              ", "    Carets (^)                      ", "    Underscore (_)                  ", "    Graves (`)                      ", "    Opening Curly Brackets ({)      ", "    Vertical Bars (|)               ", "    Closing Curly Brackets (})      ", "    Tildes (~)                      ", "    Pounds (£)                      ", "    Micros (µ)                      ", "    Obeluses (÷)                    ", "    Degrees (°)                     ", "    No-Breaking Spaces ( )          ", "    1                               ", "    2                               ", "    3                               ", "    4                               ", "    5                               ", "    6                               ", "    7                               ", "    8                               ", "    9                               ", "    0                               ", "    A                               ", "    B                               ", "    C                               ", "    D                               ", "    E                               ",  "    F                               ", "    G                               ", "    H                               ", "    I                               ", "    J                               ", "    K                               ", "    L                               ", "    M                               ", "    N                               ", "    O                               ", "    P                               ", "    Q                               ", "    R                               ", "    S                               ", "    T                               ", "    U                               ", "    V                               ", "    W                               ", "    X                               ", "    Y                               ", "    Z                               ", "    a                               ", "    b                               ", "    c                               ", "    d                               ", "    e                               ", "    f                               ", "    g                               ", "    h                               ", "    i                               ", "    j                               ", "    k                               ", "    l                               ", "    m                               ", "    n                               ", "    o                               ", "    p                               ", "    q                               ", "    r                               ", "    s                               ", "    t                               ", "    u                               " , "    v                               ", "    w                               ", "    x                               ", "    y                               ", "    z                               ", "\nUnrecognized characters:            " };
 
@@ -68,8 +68,7 @@ void draw() {
 		break;
 	case 2:
 		necessities::goXY(0, 2);
-		std::cout << inputstr;
-		//necessities::goXY(x, y);
+		std::cout << decoded;
 		break;
 	case 3:
 		for (int i = 0; i <= screen.srWindow.Bottom - 5; i++) {
@@ -138,31 +137,102 @@ void helptab() {
 
 void decode() {
 	if (GetAsyncKeyState(VK_RETURN)) {
-		int i = 0;
-		int x = 0;
-		char thing;
+		decoded.clear();
 
+		std::vector<char> keys;
+		std::vector<byte> codes;
+
+		struct modifierKeys {
+			bool caps = false;
+			bool shift = false;
+			bool ctrl = false;
+			bool alt = false;
+			bool tab = false;
+			bool altCtrl = false;
+			bool backspace = false;
+		};
+
+
+		modifierKeys modifiers;
 		necessities::setCursor(15, true);
-		necessities::goXY(x, 2);
+		necessities::goXY(0, 2);
 
 		while (GetAsyncKeyState(VK_RETURN)) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(5));
 		}
 
 		while (!GetAsyncKeyState(VK_RETURN)) {
-			thing = _getch();
+			keys.clear();
+			codes.clear();
 
-			if (thing == '\b') {
-				if (inputstr.length() > 0) {
-					inputstr.pop_back();
-					i--;
+			codes = necessities::waitForAction(false);
+
+			if (GetAsyncKeyState(VK_RETURN)) 
+				break;
+
+			if (codes.size() > 0) {
+
+				for (byte code : codes) {
+					if (std::isprint(code) && !std::iscntrl(code)) {
+						keys.push_back(char(code));
+					}
 				}
-			} else if (std::isprint(thing)) {
-				inputstr.push_back(thing);
-				i++;
-			}
 
-			draw();
+				for (byte code : codes) {
+					switch (code) 
+					{
+					case VK_BACK:
+						modifiers.backspace = true;
+						break;
+					case VK_SHIFT:
+						modifiers.shift = true;
+						break;
+					case VK_CAPITAL:
+						if (modifiers.caps)
+							modifiers.caps = false;
+						else
+							modifiers.caps = true;
+					case VK_CONTROL:
+						modifiers.ctrl = true;
+
+						for (byte code : codes) {
+							switch (code)
+							{
+							case 0x41:
+								decoded.clear();
+
+								std::cout << "All deleted!";
+							}
+						}
+						break;
+					default:
+						modifiers.shift = false;
+					}
+				}
+
+				if (!modifiers.backspace) {
+					if (keys.size() > 0) {
+						for (char key : keys) {
+							if (modifiers.shift || modifiers.caps)
+								decoded.push_back(key);
+							else
+								decoded.push_back(std::tolower(key));
+						}
+					}
+				}
+				else if (decoded.size() > 0) 
+					decoded.pop_back();
+
+				draw();
+
+				necessities::goXY(0, 1);
+				if (modifiers.shift || modifiers.caps)
+					std::cout << "CAPS";
+
+				std::this_thread::sleep_for(std::chrono::milliseconds(70));
+			}
+			else 
+				draw();
 		}
 
 		necessities::setCursor(15, false);
@@ -250,8 +320,6 @@ int main() {
 		waitForUpdate();
 		std::this_thread::sleep_for(std::chrono::nanoseconds(100));
 	}
-
-	std::cin.get();
 
     return 0;
 }
