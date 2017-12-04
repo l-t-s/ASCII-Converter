@@ -23,7 +23,7 @@
     <ProjectGuid>{10F1DF8A-3626-463C-902E-EB2B9CE0E356}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ASCIIConverter</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

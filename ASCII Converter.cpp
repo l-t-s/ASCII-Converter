@@ -216,7 +216,7 @@ int main() {
 	for (int i = 0; i < 101; i++) {
 		characters[i] = 0;
 	}
-
+	
 	std::ios::sync_with_stdio(false);
 
 	while (!GetAsyncKeyState(VK_ESCAPE)) {
@@ -250,5 +250,8 @@ int main() {
 		waitForUpdate();
 		std::this_thread::sleep_for(std::chrono::nanoseconds(100));
 	}
+
+	std::cin.get();
+
     return 0;
 }
