@@ -14,7 +14,6 @@ CONSOLE_SCREEN_BUFFER_INFO screen;
 unsigned int tab = 1;
 unsigned int conversion = 12;
 unsigned int view = 0;
-std::vector<char> input;
 std::string decoded;
 unsigned int characters[101];
 std::string items[] = { "Length: ", "\nNumber of:\n    Spaces ( )                      ", "    Exclamations (!)                ", "    Quotations (\")                  ", "    Hashes(#)                       ", "    Dollars($)                      ", "    Percents(%)                     ", "    Ampersands(&)                   ", "    Apostrophes(')                  ", "    Opening Parentheses (()         ", "    Closing Parentheses ())         ", "    Asterisks (*)                   ", "    Plusses (+)                     ", "    Commas (,)                      ", "    Dashes (-)                      ", "    Periods (.)                     ", "    Slashes (/)                     ", "    Colons (:)                      ", "    Semi-Colons (;)                 ", "    Lesser Than Quillemets (<)      ", "    Equals (=)                      ", "    Greater Than Quillemets (>)     ", "    Questions (?)                   ", "    Ats (@)                         ", "    Opening Braces ([)              ", "    Backslashes (\\)                 ", "    Closing Braces (])              ", "    Carets (^)                      ", "    Underscore (_)                  ", "    Graves (`)                      ", "    Opening Curly Brackets ({)      ", "    Vertical Bars (|)               ", "    Closing Curly Brackets (})      ", "    Tildes (~)                      ", "    Pounds (£)                      ", "    Micros (µ)                      ", "    Obeluses (÷)                    ", "    Degrees (°)                     ", "    No-Breaking Spaces ( )          ", "    1                               ", "    2                               ", "    3                               ", "    4                               ", "    5                               ", "    6                               ", "    7                               ", "    8                               ", "    9                               ", "    0                               ", "    A                               ", "    B                               ", "    C                               ", "    D                               ", "    E                               ",  "    F                               ", "    G                               ", "    H                               ", "    I                               ", "    J                               ", "    K                               ", "    L                               ", "    M                               ", "    N                               ", "    O                               ", "    P                               ", "    Q                               ", "    R                               ", "    S                               ", "    T                               ", "    U                               ", "    V                               ", "    W                               ", "    X                               ", "    Y                               ", "    Z                               ", "    a                               ", "    b                               ", "    c                               ", "    d                               ", "    e                               ", "    f                               ", "    g                               ", "    h                               ", "    i                               ", "    j                               ", "    k                               ", "    l                               ", "    m                               ", "    n                               ", "    o                               ", "    p                               ", "    q                               ", "    r                               ", "    s                               ", "    t                               ", "    u                               " , "    v                               ", "    w                               ", "    x                               ", "    y                               ", "    z                               ", "\nUnrecognized characters:            " };
@@ -28,6 +27,17 @@ struct modifier_keys {
 	bool alt_ctrl = false;
 	bool backspace = false;
 };
+
+void set_virtual_console()
+{
+	const auto h_out = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	DWORD dw_mode = 0;
+	GetConsoleMode(h_out, &dw_mode);
+
+	dw_mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+	SetConsoleMode(h_out, dw_mode);
+}
 
 void wait_update() {
 	const auto screen_old = screen;
@@ -45,7 +55,7 @@ void draw() {
 	necessities::set_window(screen.srWindow.Right + 1, screen.srWindow.Bottom + 1);
 
 	if (screen.srWindow.Right > 0) {
-		for (int i = 0; i < (screen.srWindow.Right - 28) / 5; i++) {
+		for (auto i = 0; i < (screen.srWindow.Right - 28) / 5; i++) {
 			space.append(" ");
 		}
 	}
@@ -73,7 +83,7 @@ void draw() {
 		std::cout << decoded;
 		break;
 	case 3:
-		for (int i = 0; i <= screen.srWindow.Bottom - 5; i++) {
+		for (auto i = 0; i <= screen.srWindow.Bottom - 5; i++) {
 			if (view + i > 101) {
 				break;
 			}
@@ -191,8 +201,8 @@ void decode() {
 					case VK_CONTROL:
 						modifiers.ctrl = true;
 
-						for (auto code : codes) {
-							switch (code)
+						for (auto key : codes) {
+							switch (key)
 							{
 							case 0x41:
 								decoded.clear();
@@ -276,6 +286,8 @@ void encode() {
 }
 
 int main() {
+	set_virtual_console();
+
 	SetConsoleTitle(L"ASCII - Decimals");
 
 	necessities::set_cursor(15, false);
