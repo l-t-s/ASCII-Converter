@@ -5,43 +5,6 @@
 
 class necessities {
 public:
-	static HWND get_console_hwnd()
-	{
-#define MY_BUFSIZE 1024 // Buffer size for console window titles.
-		char pszNewWindowTitle[MY_BUFSIZE]; // Contains fabricated
-											// WindowTitle.
-		char pszOldWindowTitle[MY_BUFSIZE]; // Contains original
-											// WindowTitle.
-
-											// Fetch current window title.
-
-		GetConsoleTitle((LPWSTR)pszOldWindowTitle, MY_BUFSIZE);
-
-		// Format a "unique" NewWindowTitle.
-
-		wsprintf((LPWSTR)pszNewWindowTitle, L"%d/%d",
-			int(GetTickCount64()),
-			GetCurrentProcessId());
-
-		// Change current window title.
-
-		SetConsoleTitle((LPWSTR)pszNewWindowTitle);
-
-		// Ensure window title has been updated.
-
-		Sleep(40);
-
-		// Look for NewWindowTitle.
-
-		const auto hwnd_found = FindWindow(nullptr, (LPWSTR)pszNewWindowTitle); // This is what is returned to the caller.
-
-		// Restore original window title.
-
-		SetConsoleTitle((LPWSTR)pszOldWindowTitle);
-
-		return(hwnd_found);
-	}
-
 	static void set_window(const int width, const int height) {
 		const auto handle = GetStdHandle(STD_OUTPUT_HANDLE);
 

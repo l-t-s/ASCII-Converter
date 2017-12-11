@@ -173,7 +173,7 @@ void decode() {
 
 			codes = necessities::wait_for_action(false);
 
-			if (GetAsyncKeyState(VK_RETURN)) 
+			if (GetAsyncKeyState(VK_RETURN))
 				break;
 
 			if (!codes.empty()) {
@@ -185,7 +185,7 @@ void decode() {
 				}
 
 				for (auto code : codes) {
-					switch (code) 
+					switch (code)
 					{
 					case VK_BACK:
 						modifiers.backspace = true;
@@ -241,7 +241,7 @@ void decode() {
 
 				std::this_thread::sleep_for(std::chrono::milliseconds(70));
 			}
-			else 
+			else
 				draw();
 		}
 
@@ -298,7 +298,7 @@ int main() {
 	for (int i : characters) {
 		characters[i] = 0;
 	}
-	
+
 	std::ios::sync_with_stdio(false);
 
 	while (!GetAsyncKeyState(VK_ESCAPE)) {
