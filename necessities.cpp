@@ -59,6 +59,38 @@ public:
 		SetConsoleScreenBufferSize(handle, coord);
 	}
 
+	static void enable_virtual_console()
+	{
+		const auto h_out = GetStdHandle(STD_OUTPUT_HANDLE);
+		const auto h_in = GetStdHandle(STD_INPUT_HANDLE);
+		DWORD dw_mode = 0;
+		GetConsoleMode(h_out, &dw_mode);
+		dw_mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+		SetConsoleMode(h_out, dw_mode);
+		GetConsoleMode(h_in, &dw_mode);
+		dw_mode |= ENABLE_VIRTUAL_TERMINAL_INPUT;
+		SetConsoleMode(h_in, dw_mode);
+	}
+
+	static void disable_mouse_interaction()
+	{
+		const auto h_in = GetStdHandle(STD_INPUT_HANDLE);
+		DWORD dw_mode = 0;
+		GetConsoleMode(h_in, &dw_mode);
+		dw_mode = dw_mode & ~ENABLE_MOUSE_INPUT;
+		dw_mode = dw_mode & ~ENABLE_QUICK_EDIT_MODE;
+		SetConsoleMode(h_in, dw_mode);
+	}
+
+	static void disable_ctrl_functions()
+	{
+		const auto h_in = GetStdHandle(STD_INPUT_HANDLE);
+		DWORD dw_mode = 0;
+		GetConsoleMode(h_in, &dw_mode);
+		dw_mode = dw_mode & ~ENABLE_PROCESSED_INPUT;
+		SetConsoleMode(h_in, dw_mode);
+	}
+
 	static CONSOLE_SCREEN_BUFFER_INFO clear() {
 		const COORD top_left = { 0, 0 };
 		CONSOLE_SCREEN_BUFFER_INFO screen;
@@ -375,44 +407,84 @@ public:
 		return false;
 	}
 
-	static void wait_mouse_move() {
+	static void wait_mouse_move(const bool invert) {
 		POINT p;
 		GetCursorPos(&p);
 		const auto op = p;
 
-		while (true) {
-			if (op.x != p.x || op.y != p.y)
-				break;
-			else
-				GetCursorPos(&p);
+		if (invert)
+		{
+			while (true)
+			{
+				if (op.x == p.x || op.y == p.y)
+					break;
+				else
+					GetCursorPos(&p);
 
-			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			}
 		}
+		else
+		{
+			while (true) 
+			{
+				if (op.x != p.x || op.y != p.y)
+					break;
+				else
+					GetCursorPos(&p);
+
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			}
+		}
+		
 	}
 
-	static std::vector<byte> wait_mouse_click() {
+	static std::vector<byte> wait_mouse_click(const bool invert) {
 		std::vector<byte> codes;
 		codes.clear();
 
-		while (codes.empty()) {
-			codes = mouse_down();
+		if (invert)
+		{
+			while (!codes.empty())
+			{
+				codes = mouse_down();
 
-			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			}
+		}
+		else
+		{
+			while (codes.empty()) 
+			{
+				codes = mouse_down();
+
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			}
 		}
 
 		return codes;
 	}
 
-	static std::vector<byte> wait_key_down() {
-		std::vector<byte> codes;
-		codes.empty();
+	static std::vector<byte> wait_key_down(const bool invert) {
+		auto codes = key_down();
 
-		while (!codes.empty()) {
-			codes = key_down();
+		if (invert)
+		{
+			while (!codes.empty()) {
+				codes = key_down();
 
-			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			}
 		}
+		else
+		{
+			while (codes.empty()) {
+				codes = key_down();
 
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			}
+		}
+		
 		return codes;
 	}
 
@@ -424,7 +496,8 @@ public:
 		GetCursorPos(&p);
 		const auto op = p;
 
-		while (!codes.empty()) {
+		while (codes.empty()) 
+		{
 			auto keys = key_down();
 			codes.insert(codes.begin(), keys.begin(), keys.end());
 
@@ -438,7 +511,7 @@ public:
 					GetCursorPos(&p);
 			}
 
-			std::this_thread::sleep_for(std::chrono::nanoseconds(100));
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		}
 
 		return codes;

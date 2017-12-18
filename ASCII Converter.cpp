@@ -28,18 +28,8 @@ struct modifier_keys {
 	bool backspace = false;
 };
 
-void set_virtual_console()
+void wait_update() 
 {
-	const auto h_out = GetStdHandle(STD_OUTPUT_HANDLE);
-
-	DWORD dw_mode = 0;
-	GetConsoleMode(h_out, &dw_mode);
-
-	dw_mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-	SetConsoleMode(h_out, dw_mode);
-}
-
-void wait_update() {
 	const auto screen_old = screen;
 	while (screen_old.srWindow.Right == screen.srWindow.Right && screen_old.srWindow.Bottom == screen.srWindow.Bottom && !GetAsyncKeyState(VK_RETURN) && !GetAsyncKeyState(VK_DOWN) && !GetAsyncKeyState(VK_UP) && !GetAsyncKeyState(VK_RIGHT) && !GetAsyncKeyState(VK_LEFT) && !GetAsyncKeyState(VK_ESCAPE)) {
 		GetConsoleScreenBufferInfo(console, &screen);
@@ -158,6 +148,7 @@ void decode() {
 
 		std::vector<char> keys;
 		std::vector<byte> codes;
+		unsigned int timer = 0;
 
 		modifier_keys modifiers;
 		necessities::set_cursor(15, true);
@@ -189,18 +180,19 @@ void decode() {
 					{
 					case VK_BACK:
 						modifiers.backspace = true;
-						break;
+						continue;
 					case VK_SHIFT:
 						modifiers.shift = true;
-						break;
+						continue;
 					case VK_CAPITAL:
 						if (modifiers.caps)
 							modifiers.caps = false;
 						else
 							modifiers.caps = true;
+						continue;
 					case VK_CONTROL:
 						modifiers.ctrl = true;
-
+						/*
 						for (auto key : codes) {
 							switch (key)
 							{
@@ -211,10 +203,7 @@ void decode() {
 							default:
 								break;
 							}
-						}
-						break;
-					default:
-						modifiers.shift = false;
+						}*/
 					}
 				}
 
@@ -236,13 +225,29 @@ void decode() {
 				draw();
 
 				necessities::go_to(0, 1);
-				if (modifiers.shift || modifiers.caps)
-					std::cout << "CAPS";
-
-				std::this_thread::sleep_for(std::chrono::milliseconds(70));
+				if (modifiers.caps)
+					std::cout << "CAPS ";
+				if (modifiers.shift)
+					std::cout << "SHIFT ";
+				if (modifiers.ctrl)
+					std::cout << "CTRL ";
+				modifiers.caps = false;
+				modifiers.shift = false;
+				modifiers.ctrl = false;
 			}
 			else 
 				draw();
+
+			while (!necessities::key_down().empty())
+			{
+				timer++;
+
+				if (timer >= 500)
+					break;
+
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			}
+			timer = 0;
 		}
 
 		necessities::set_cursor(15, false);
@@ -286,7 +291,9 @@ void encode() {
 }
 
 int main() {
-	set_virtual_console();
+	necessities::enable_virtual_console();
+	necessities::disable_mouse_interaction();
+	necessities::disable_ctrl_functions();
 
 	SetConsoleTitle(L"ASCII - Decimals");
 
