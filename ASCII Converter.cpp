@@ -12,11 +12,12 @@
 HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
 CONSOLE_SCREEN_BUFFER_INFO screen;
 
+char separator = ' ';
 unsigned int tab = 1;
 unsigned int conversion = 12;
 unsigned int view = 0;
 std::string decoded;
-unsigned int characters[101];
+std::vector<unsigned int> characters;
 std::vector<std::string> items;
 
 struct modifier_keys {
@@ -34,7 +35,7 @@ void wait_update()
 	const auto screen_old = screen;
 	while (screen_old.srWindow.Right == screen.srWindow.Right && screen_old.srWindow.Bottom == screen.srWindow.Bottom && !GetAsyncKeyState(VK_RETURN) && !GetAsyncKeyState(VK_DOWN) && !GetAsyncKeyState(VK_UP) && !GetAsyncKeyState(VK_RIGHT) && !GetAsyncKeyState(VK_LEFT) && !GetAsyncKeyState(VK_ESCAPE)) {
 		GetConsoleScreenBufferInfo(console, &screen);
-		std::this_thread::sleep_for(std::chrono::milliseconds(5));
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 }
 
@@ -74,18 +75,14 @@ void draw() {
 		std::cout << decoded;
 		break;
 	case 3:
-		for (auto i = 0; i <= screen.srWindow.Bottom - 5; i++) {
-			if (view + i > items.size() - 1) {
+		for (auto i = 0; i <= screen.srWindow.Bottom - 3; i++) {
+			if (view + i > items.size() - 1) 
 				break;
-			}
-			else if (i + view == 3)
-			{
+
+			if (i + view == 3)
 				std::cout << items[i + view] << "hmmm" << std::endl;
-			}
 			else
-			{
 				std::cout << items[i + view] << characters[i + view] << std::endl;
-			}
 		}
 		necessities::go_to(0, 0);
 		std::cout << " ";
@@ -96,8 +93,21 @@ void draw() {
 		break;
 	default:
 		std::cout << "Move selection with arrow keys.\nLeft and right to switch tabs.\nEnter / Return key to interact with tab.\nEscape key to exit programme.\n\nUp and down to change options in this tab.\n\n\nConversion:\n\n Decimals\n Hexadecimals\n Octals";
-		necessities::go_to(0, 0);
+		necessities::go_to(0, conversion);
+		std::cout << ">";
+		necessities::go_to(0, 1);
 		std::cout << " ";
+
+		switch (conversion) {
+		case 13:
+			SetConsoleTitle(L"ASCII - Hexadecimals");
+			break;
+		case 14:
+			SetConsoleTitle(L"ASCII - Octals");
+			break;
+		default:
+			SetConsoleTitle(L"ASCII - Decimals");
+		}
 
 		necessities::set_cursor(15, false);
 	}
@@ -105,49 +115,12 @@ void draw() {
 }
 
 void helptab() {
-	if (GetAsyncKeyState(VK_RETURN)) {
-		necessities::go_to(0, conversion);
-		std::cout << ">";
-
-		while (GetAsyncKeyState(VK_RETURN)) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(5));
-		}
-
-		while (!GetAsyncKeyState(VK_RETURN)) {
-			if (GetAsyncKeyState(VK_DOWN) && conversion != 14) {
-				necessities::go_to(0, conversion);
-				std::cout << " ";
-				conversion++;
-				necessities::go_to(0, conversion);
-				std::cout << ">";
-			} else if (GetAsyncKeyState(VK_UP) && conversion != 12) {
-				necessities::go_to(0, conversion);
-				std::cout << " ";
-				conversion--;
-				necessities::go_to(0, conversion);
-				std::cout << ">";
-			}
-
-			switch (conversion) {
-				case 13:
-					SetConsoleTitle(L"ASCII - Hexadecimals");
-					break;
-				case 14:
-					SetConsoleTitle(L"ASCII - Octals");
-					break;
-				default:
-					SetConsoleTitle(L"ASCII - Decimals");
-			}
-
-			while (GetAsyncKeyState(VK_DOWN) || GetAsyncKeyState(VK_UP)) {
-				std::this_thread::sleep_for(std::chrono::milliseconds(5));
-			}
-
-			std::this_thread::sleep_for(std::chrono::milliseconds(5));
-		}
-	} else if (GetAsyncKeyState(VK_RIGHT)) {
+	if (GetAsyncKeyState(VK_UP) && conversion > 12)
+		conversion--;
+	else if (GetAsyncKeyState(VK_DOWN) && conversion < 14)
+		conversion++;
+	else if (GetAsyncKeyState(VK_RIGHT)) 
 		tab = 2;
-	}
 }
 
 void decode() {
@@ -316,7 +289,7 @@ int main() {
 		items.push_back(line);
 
 	for (auto i = 0; i < items.size(); i++)
-		characters[i] = 0;
+		characters.push_back(0);
 
 	std::ios::sync_with_stdio(false);
 

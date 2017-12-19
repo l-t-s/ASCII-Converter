@@ -3,8 +3,7 @@
 #include <thread>
 #include <vector>
 
-class necessities {
-public:
+namespace necessities {
 	static void set_window(const int width, const int height) {
 		const auto handle = GetStdHandle(STD_OUTPUT_HANDLE);
 
