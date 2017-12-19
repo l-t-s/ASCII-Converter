@@ -149,14 +149,11 @@ void decode() {
 				break;
 
 			if (!codes.empty()) {
-
-				for (auto code : codes) {
-					if (std::isprint(code) && !std::iscntrl(code)) {
+				for (auto code : codes) 
+				{
+					if (std::isprint(code)) 
 						keys.push_back(char(code));
-					}
-				}
 
-				for (auto code : codes) {
 					switch (code)
 					{
 					case VK_BACK:
@@ -188,17 +185,18 @@ void decode() {
 					}
 				}
 
-				if (!modifiers.backspace) {
-					if (!keys.empty()) {
-						for (auto key : keys) {
-							if (modifiers.shift || modifiers.caps)
-								decoded.push_back(key);
-							else
-								decoded.push_back(std::tolower(key));
-						}
+				if (!modifiers.backspace) 
+				{
+					if (!keys.empty()) 
+					{
+						if (modifiers.shift || modifiers.caps)
+							decoded.push_back(keys.at(0));
+						else
+							decoded.push_back(std::tolower(keys.at(0)));
 					}
 				}
-				else {
+				else 
+				{
 					if (!decoded.empty())
 						decoded.pop_back();
 				}
@@ -212,29 +210,62 @@ void decode() {
 					std::cout << "SHIFT ";
 				if (modifiers.ctrl)
 					std::cout << "CTRL ";
+				if (modifiers.backspace)
+					std::cout << "BACK ";
+
+				auto temp = necessities::key_down();
+				for (auto i = 0; temp == codes && i < 500; i++)
+				{
+					temp = necessities::key_down();
+
+					if (i < 500)
+						std::this_thread::sleep_for(std::chrono::milliseconds(1));
+					else
+					{
+						if (!modifiers.backspace)
+						{
+							if (!keys.empty())
+							{
+								if (modifiers.shift || modifiers.caps)
+									decoded.push_back(keys.at(0));
+								else
+									decoded.push_back(std::tolower(keys.at(0)));
+							}
+						}
+						else
+						{
+							if (!decoded.empty())
+								decoded.pop_back();
+						}
+
+						draw();
+
+						necessities::go_to(0, 1);
+						if (modifiers.caps)
+							std::cout << "CAPS ";
+						if (modifiers.shift)
+							std::cout << "SHIFT ";
+						if (modifiers.ctrl)
+							std::cout << "CTRL ";
+						if (modifiers.backspace)
+							std::cout << "BACK ";
+
+					}
+				}
+
 				modifiers.caps = false;
 				modifiers.shift = false;
 				modifiers.ctrl = false;
+				modifiers.backspace = false;
 			}
 			else
 				draw();
-
-			while (!necessities::key_down().empty())
-			{
-				timer++;
-
-				if (timer >= 500)
-					break;
-
-				std::this_thread::sleep_for(std::chrono::milliseconds(1));
-			}
-			timer = 0;
 		}
 
 		necessities::set_cursor(15, false);
 
 		while (GetAsyncKeyState(VK_RETURN)) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(5));
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		}
 	} else if (GetAsyncKeyState(VK_LEFT)) {
 		tab = 1;
