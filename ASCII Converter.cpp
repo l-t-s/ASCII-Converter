@@ -4,6 +4,7 @@
 #include <chrono>
 #include <conio.h>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 #include <thread>
@@ -16,7 +17,7 @@ unsigned int conversion = 12;
 unsigned int view = 0;
 std::string decoded;
 unsigned int characters[101];
-std::string items[] = { "Length: ", "\nNumber of:\n    Spaces ( )                      ", "    Exclamations (!)                ", "    Quotations (\")                  ", "    Hashes(#)                       ", "    Dollars($)                      ", "    Percents(%)                     ", "    Ampersands(&)                   ", "    Apostrophes(')                  ", "    Opening Parentheses (()         ", "    Closing Parentheses ())         ", "    Asterisks (*)                   ", "    Plusses (+)                     ", "    Commas (,)                      ", "    Dashes (-)                      ", "    Periods (.)                     ", "    Slashes (/)                     ", "    Colons (:)                      ", "    Semi-Colons (;)                 ", "    Lesser Than Quillemets (<)      ", "    Equals (=)                      ", "    Greater Than Quillemets (>)     ", "    Questions (?)                   ", "    Ats (@)                         ", "    Opening Braces ([)              ", "    Backslashes (\\)                 ", "    Closing Braces (])              ", "    Carets (^)                      ", "    Underscore (_)                  ", "    Graves (`)                      ", "    Opening Curly Brackets ({)      ", "    Vertical Bars (|)               ", "    Closing Curly Brackets (})      ", "    Tildes (~)                      ", "    Pounds (£)                      ", "    Micros (µ)                      ", "    Obeluses (÷)                    ", "    Degrees (°)                     ", "    No-Breaking Spaces ( )          ", "    1                               ", "    2                               ", "    3                               ", "    4                               ", "    5                               ", "    6                               ", "    7                               ", "    8                               ", "    9                               ", "    0                               ", "    A                               ", "    B                               ", "    C                               ", "    D                               ", "    E                               ",  "    F                               ", "    G                               ", "    H                               ", "    I                               ", "    J                               ", "    K                               ", "    L                               ", "    M                               ", "    N                               ", "    O                               ", "    P                               ", "    Q                               ", "    R                               ", "    S                               ", "    T                               ", "    U                               ", "    V                               ", "    W                               ", "    X                               ", "    Y                               ", "    Z                               ", "    a                               ", "    b                               ", "    c                               ", "    d                               ", "    e                               ", "    f                               ", "    g                               ", "    h                               ", "    i                               ", "    j                               ", "    k                               ", "    l                               ", "    m                               ", "    n                               ", "    o                               ", "    p                               ", "    q                               ", "    r                               ", "    s                               ", "    t                               ", "    u                               " , "    v                               ", "    w                               ", "    x                               ", "    y                               ", "    z                               ", "\nUnrecognized characters:            " };
+std::vector<std::string> items;
 
 struct modifier_keys {
 	bool caps = false;
@@ -74,10 +75,17 @@ void draw() {
 		break;
 	case 3:
 		for (auto i = 0; i <= screen.srWindow.Bottom - 5; i++) {
-			if (view + i > 101) {
+			if (view + i > items.size() - 1) {
 				break;
 			}
-			std::cout << items[i + view] << characters[i + view] << std::endl;
+			else if (i + view == 3)
+			{
+				std::cout << items[i + view] << "hmmm" << std::endl;
+			}
+			else
+			{
+				std::cout << items[i + view] << characters[i + view] << std::endl;
+			}
 		}
 		necessities::go_to(0, 0);
 		std::cout << " ";
@@ -264,7 +272,7 @@ void decode() {
 
 void infotab() {
 	if (GetAsyncKeyState(VK_DOWN)) {
-		if (view >= 101) {
+		if (view >= items.size() - 1) {
 			view = 0;
 		} else {
 			view++;
@@ -272,7 +280,7 @@ void infotab() {
 		std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	} else if (GetAsyncKeyState(VK_UP)) {
 		if (view <= 0) {
-			view = 101;
+			view = items.size() - 1;
 		} else {
 			view--;
 		}
@@ -302,9 +310,13 @@ int main() {
 	necessities::set_window(45, 17);
 	necessities::set_window(46, 18);
 
-	for (int i : characters) {
+	std::ifstream input("infotab.txt");
+	std::string line;
+	for (auto i = 0; std::getline(input, line); i++)
+		items.push_back(line);
+
+	for (auto i = 0; i < items.size(); i++)
 		characters[i] = 0;
-	}
 
 	std::ios::sync_with_stdio(false);
 

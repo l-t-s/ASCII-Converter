@@ -362,9 +362,7 @@ public:
 		auto keys = key_down();
 		auto buttons = mouse_down();
 
-		if (is_mouse_move ||
-			!keys.empty() ||
-			!buttons.empty())
+		if (is_mouse_move || !keys.empty() || !buttons.empty())
 			return true;
 
 		return false;
