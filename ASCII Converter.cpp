@@ -319,7 +319,7 @@ int main() {
 	for (auto i = 0; std::getline(input, line); i++)
 		items.push_back(line);
 
-	for (auto i = 0; i < items.size(); i++)
+	for (unsigned int i = 0; i < items.size(); i++)
 		characters.push_back(0);
 
 	std::ios::sync_with_stdio(false);
