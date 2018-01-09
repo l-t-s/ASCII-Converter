@@ -2,9 +2,13 @@
 #include <chrono>
 #include <thread>
 #include <vector>
+#include <string>
+#include <algorithm>
 
-namespace necessities {
-	static void set_window(const int width, const int height) {
+namespace necessities 
+{
+	static void set_window(const int width, const int height) 
+	{
 		const auto handle = GetStdHandle(STD_OUTPUT_HANDLE);
 
 		_COORD coord;
@@ -53,7 +57,8 @@ namespace necessities {
 		SetConsoleMode(h_in, dw_mode);
 	}
 
-	static CONSOLE_SCREEN_BUFFER_INFO clear() {
+	static CONSOLE_SCREEN_BUFFER_INFO clear() 
+	{
 		const COORD top_left = { 0, 0 };
 		CONSOLE_SCREEN_BUFFER_INFO screen;
 		DWORD written;
@@ -73,7 +78,8 @@ namespace necessities {
 		return screen;
 	}
 
-	static void go_to(const int x, const int y) {
+	static void go_to(const int x, const int y) 
+	{
 		const auto handle = GetStdHandle(STD_OUTPUT_HANDLE);
 
 		COORD coord;
@@ -82,7 +88,8 @@ namespace necessities {
 		SetConsoleCursorPosition(handle, coord);
 	}
 
-	static void set_cursor(int size, const bool visibility) {
+	static void set_cursor(int size, const bool visibility) 
+	{
 		const auto handle = GetStdHandle(STD_OUTPUT_HANDLE);
 
 		if (size < 15)
@@ -97,7 +104,8 @@ namespace necessities {
 		SetConsoleCursorInfo(handle, &cursor);
 	}
 
-	static bool is_mouse_move() {
+	static bool is_mouse_move() 
+	{
 		POINT p;
 		GetCursorPos(&p);
 		const auto op = p;
@@ -109,7 +117,8 @@ namespace necessities {
 		if (op.x != p.x || op.y != p.y) return true; return false;
 	}
 
-	static std::vector<byte> mouse_down() {
+	static std::vector<byte> mouse_down() 
+	{
 		std::vector<byte> codes;
 
 		if (GetAsyncKeyState(VK_LBUTTON))
@@ -126,7 +135,8 @@ namespace necessities {
 		return codes;
 	}
 
-	static std::vector<byte> key_down() {
+	static std::vector<byte> key_down() 
+	{
 		std::vector<byte> codes;
 		codes.clear();
 
@@ -354,7 +364,8 @@ namespace necessities {
 		return codes;
 	}
 
-	static bool is_active() {
+	static bool is_active() 
+	{
 		std::vector<byte> codes;
 		codes.clear();
 
@@ -367,7 +378,8 @@ namespace necessities {
 		return false;
 	}
 
-	static void wait_mouse_move(const bool invert) {
+	static void wait_mouse_move(const bool invert) 
+	{
 		POINT p;
 		GetCursorPos(&p);
 		const auto op = p;
@@ -399,7 +411,8 @@ namespace necessities {
 		
 	}
 
-	static std::vector<byte> wait_mouse_click(const bool invert) {
+	static std::vector<byte> wait_mouse_click(const bool invert) 
+	{
 		std::vector<byte> codes;
 		codes.clear();
 
@@ -425,7 +438,8 @@ namespace necessities {
 		return codes;
 	}
 
-	static std::vector<byte> wait_key_down(const bool invert) {
+	static std::vector<byte> wait_key_down(const bool invert) 
+	{
 		auto codes = key_down();
 
 		if (invert)
@@ -448,7 +462,8 @@ namespace necessities {
 		return codes;
 	}
 
-	static std::vector<byte> wait_for_action(const bool watch_mouse_movement) {
+	static std::vector<byte> wait_for_action(const bool watch_mouse_movement) 
+	{
 		std::vector<byte> codes;
 		codes.clear();
 
@@ -476,4 +491,52 @@ namespace necessities {
 
 		return codes;
 	}
+	
+	namespace string 
+	{
+		static std::string parse(std::string target, char parsable)
+		{
+			if (target.empty())
+				return target;
+			else 
+				target.erase(std::remove(target.begin(), target.end(), parsable));
+
+			return target;
+		}
+		
+		static std::string parse_preceding(std::string target, char parsable) 
+		{
+			if (target.empty())
+				return target;
+			else
+				while (target[0] == parsable)
+					target.erase(target.begin());
+
+			return target;
+		}
+		
+		static std::string parse_following(std::string target, char parsable) 
+		{
+			if (target.empty())
+				return target;
+			else
+				while (target.back == parsable)
+					target.erase(target.end());
+
+			return target;
+		}
+		
+		static std::string parse_around(std::string target, char parsable)
+		{
+			if (target.empty())
+				return target;
+			else 
+			{
+				target = parse_preceding(target, parsable);
+				target = parse_following(target, parsable);
+			}
+			
+			return target;
+		}
+	};
 };
