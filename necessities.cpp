@@ -25,35 +25,60 @@ namespace necessities
 		SetConsoleScreenBufferSize(handle, coord);
 	}
 
-	static void enable_virtual_console()
+	static void virtual_console_processing(const bool enable, const bool including_stdin)
 	{
 		const auto h_out = GetStdHandle(STD_OUTPUT_HANDLE);
-		const auto h_in = GetStdHandle(STD_INPUT_HANDLE);
 		DWORD dw_mode = 0;
 		GetConsoleMode(h_out, &dw_mode);
-		dw_mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+
+		if (enable)
+			dw_mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+		else
+			dw_mode = dw_mode & ~ENABLE_VIRTUAL_TERMINAL_PROCESSING;
 		SetConsoleMode(h_out, dw_mode);
-		GetConsoleMode(h_in, &dw_mode);
-		dw_mode |= ENABLE_VIRTUAL_TERMINAL_INPUT;
-		SetConsoleMode(h_in, dw_mode);
+
+		if (including_stdin)
+		{
+			const auto h_in = GetStdHandle(STD_INPUT_HANDLE);
+			GetConsoleMode(h_in, &dw_mode);
+
+			if (enable)
+				dw_mode |= ENABLE_VIRTUAL_TERMINAL_INPUT;
+			else
+				dw_mode = dw_mode & ~ENABLE_VIRTUAL_TERMINAL_INPUT;
+			SetConsoleMode(h_in, dw_mode);
+		}
 	}
 
-	static void disable_mouse_interaction()
+	static void mouse_interaction(const bool enable)
 	{
 		const auto h_in = GetStdHandle(STD_INPUT_HANDLE);
 		DWORD dw_mode = 0;
 		GetConsoleMode(h_in, &dw_mode);
-		dw_mode = dw_mode & ~ENABLE_MOUSE_INPUT;
-		dw_mode = dw_mode & ~ENABLE_QUICK_EDIT_MODE;
+
+		if (enable)
+		{
+			dw_mode |= ENABLE_MOUSE_INPUT;
+			dw_mode |= ENABLE_QUICK_EDIT_MODE;
+		}
+		else
+		{
+			dw_mode = dw_mode & ~ENABLE_MOUSE_INPUT;
+			dw_mode = dw_mode & ~ENABLE_QUICK_EDIT_MODE;
+		}
 		SetConsoleMode(h_in, dw_mode);
 	}
 
-	static void disable_ctrl_functions()
+	static void ctrl_functions(const bool enable)
 	{
 		const auto h_in = GetStdHandle(STD_INPUT_HANDLE);
 		DWORD dw_mode = 0;
 		GetConsoleMode(h_in, &dw_mode);
-		dw_mode = dw_mode & ~ENABLE_PROCESSED_INPUT;
+
+		if (enable)
+			dw_mode |= ENABLE_PROCESSED_INPUT;
+		else
+			dw_mode = dw_mode & ~ENABLE_PROCESSED_INPUT;
 		SetConsoleMode(h_in, dw_mode);
 	}
 
@@ -372,7 +397,7 @@ namespace necessities
 		auto keys = key_down();
 		auto buttons = mouse_down();
 
-		if (is_mouse_move || !keys.empty() || !buttons.empty())
+		if (is_mouse_move() || !keys.empty() || !buttons.empty())
 			return true;
 
 		return false;
@@ -494,7 +519,7 @@ namespace necessities
 	
 	namespace string 
 	{
-		static std::string parse(std::string target, char parsable)
+		static std::string parse(std::string target, const char parsable)
 		{
 			if (target.empty())
 				return target;
@@ -504,7 +529,7 @@ namespace necessities
 			return target;
 		}
 		
-		static std::string parse_preceding(std::string target, char parsable) 
+		static std::string parse_preceding(std::string target, const char parsable) 
 		{
 			if (target.empty())
 				return target;
@@ -515,18 +540,18 @@ namespace necessities
 			return target;
 		}
 		
-		static std::string parse_following(std::string target, char parsable) 
+		static std::string parse_following(std::string target, const char parsable) 
 		{
 			if (target.empty())
 				return target;
 			else
-				while (target.back == parsable)
+				while (target.back() == parsable)
 					target.erase(target.end());
 
 			return target;
 		}
 		
-		static std::string parse_around(std::string target, char parsable)
+		static std::string parse_around(std::string target, const char parsable)
 		{
 			if (target.empty())
 				return target;
